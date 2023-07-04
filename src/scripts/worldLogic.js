@@ -19,6 +19,8 @@ class WorldLogic {
         // Assign variables to be handled by logic below.
         let worldObjects = this.worldObjects;
         let mixers = this.mixers;
+        let enemyMixers = [];
+        let currentMove = 'idle';
         let scene = this.scene;
         let plane = this.plane;
         let camera = this.camera;
@@ -127,43 +129,39 @@ class WorldLogic {
         // Define enemy spawn logic
         let enemies = [];
         async function gameStart() {
-            for (let i = 0; i < 5; i++) {
-                const loader = new FBXLoader();
-                loader.load('./assets/zombie/zombie-model.fbx', (fbx) => {
-                    fbx.scale.setScalar(0.04);
-                    fbx.traverse(c => {
-                        if (c.isMesh) {
-                            c.castShadow = true;
-                            c.receiveShadow = false;
-                        }
-                    });
-                    // const animation = new FBXLoader();
-                    // animation.load("./assets/zombie/zombie-idle.fbx", (animation) => {
-                    //     const mixer = new THREE.AnimationMixer(fbx);
-                    //     mixer.name = 'idle'
-                    //     this.mixers.push(mixer);
-                    //     mixer.clipAction(animation.animations[0]).play();
-                    // })
-
-                    // const animation2 = new FBXLoader();
-                    // animation2.load("./assets/player/animation-run-forward.fbx", (animation) => {
-                    //     const mixer = new THREE.AnimationMixer(fbx);
-                    //     mixer.name = 'run-forward'
-                    //     this.mixers.push(mixer);
-                    //     mixer.clipAction(animation.animations[0]).play();
-                    // })
-                    fbx.position.x = (Math.random() - 0.5) * 70;
-                    fbx.position.z = Math.random() * -100 - 25;
-                    fbx.name = "enemy"
-                    fbx.nametag = 'Enemy Minion'
-                    // Each enemy has an internal timer to space attacks between
-                    fbx.clock = new THREE.Clock();
-                    scene.add(fbx);
-                    enemies.push(fbx);
-                    enemies.sort(sortEnemies)
-                    scene.add(fbx)
+            const loader = new FBXLoader();
+            loader.load('./assets/zombie/zombie-model.fbx', (fbx) => {
+                fbx.scale.setScalar(0.04);
+                fbx.traverse(c => {
+                    if (c.isMesh) {
+                        c.castShadow = true;
+                        c.receiveShadow = false;
+                    }
+                });
+                const animation = new FBXLoader();
+                animation.load("./assets/zombie/zombie-idle.fbx", (animation) => {
+                    const mixer = new THREE.AnimationMixer(fbx);
+                    enemyMixers.push(mixer);
+                    mixer.clipAction(animation.animations[0]).play();
                 })
-            }
+
+                // const animation2 = new FBXLoader();
+                // animation2.load("./assets/player/animation-run-forward.fbx", (animation) => {
+                //     const mixer = new THREE.AnimationMixer(fbx);
+                //     mixer.name = 'run-forward'
+                //     this.mixers.push(mixer);
+                //     mixer.clipAction(animation.animations[0]).play();
+                // })
+                fbx.position.x = (Math.random() - 0.5) * 70;
+                fbx.position.z = Math.random() * -100 - 25;
+                fbx.name = "enemy"
+                fbx.nametag = 'Enemy Minion'
+                // Each enemy has an internal timer to space attacks between
+                fbx.clock = new THREE.Clock();
+                scene.add(fbx);
+                enemies.push(fbx);
+                enemies.sort(sortEnemies);
+            })
                 
             function sortEnemies(a, b) {
                 const playerLocation = objects.player.position;
@@ -246,29 +244,43 @@ class WorldLogic {
             } else if (e.key === '2' && ui.mana >= 3) {
                 firing = true;
                 objects.player.lookAt(new THREE.Vector3(pointingTo.x, 0, pointingTo.z));
-                
+                let audio = new Audio("./assets/shock-spell.mp3");
+                if (!muted) audio.play();
+                shotCount += 1;
+                ui.mana -= 3;
+                const loader = new OBJLoader();
                 loader.load("./assets/player/arrow.obj", function(obj) {
-                    obj.position.x = objects.player.position.x;
-                    obj.position.y = objects.player.position.y + 2;
-                    obj.position.z = objects.player.position.z;
-                    console.log(obj.quaternion)
-                    // obj.quaternion.copy(objects.player.quaternion)
-                    obj.rotation.y += Math.PI / 4;
-                    console.log(obj.quaternion)
-                    obj.scale.setScalar(0.1);
-                    obj.name = "multiarrow";
-                    let audio = new Audio("./assets/shock-spell.mp3");
-                    if (!muted) audio.play();
-                    shotCount += 1;
-                    ui.mana -= 3;
-                    shotObjects.push({
-                        obj, 
-                        initialX: objects.player.position.x, 
-                        initialZ: objects.player.position.z, 
-                        destinationX: pointingTo.x, 
-                        destinationZ: pointingTo.z
-                    });
-                    scene.add(obj);
+                    for (let i = 0; i < 3; i++) {
+                        obj.position.x = objects.player.position.x;
+                        obj.position.y = objects.player.position.y + 2;
+                        obj.position.z = objects.player.position.z;
+                        console.log(obj.quaternion)
+                        // obj.quaternion.copy(objects.player.quaternion)
+                        obj.rotation.y += Math.PI / 4;
+                        console.log(obj.quaternion)
+                        obj.scale.setScalar(0.1);
+                        obj.name = "multiArrow";
+
+                        let modifier;
+                        switch (i) {
+                            case 0:
+                                modifier = -20;
+                            case 1:
+                                modifier = 0;
+                            case 2:
+                                modifier = 20;
+                            default:
+                                break;
+                        }
+                        shotObjects.push({
+                            obj, 
+                            initialX: objects.player.position.x, 
+                            initialZ: objects.player.position.z, 
+                            destinationX: pointingTo.x + modifier, 
+                            destinationZ: pointingTo.z
+                        });
+                        scene.add(obj);
+                    }
                 })
             }
         }
@@ -297,32 +309,40 @@ class WorldLogic {
                 }
 
             }
-
+            let currentAnimation;
+            for (let i in mixers) {
+                if (mixers[i].name === currentMove) {
+                    currentAnimation = mixers[i]
+                }
+            }
             mixers.map(mixer => {
                 if (firing && mixer.name === 'draw-arrow') {
+                    currentMove = 'draw-arrow'
                     idle = true;
                     setTimeout(() => firing = false, 1000)
                     mixer.update(playTimeClock.getDelta())
                 }
                 else if (!firing && idle && mixer.name === 'idle') {
+                    currentMove = 'idle'
                     mixer.update(playTimeClock.getDelta())
                 }
                 else if (!firing && !idle && mixer.name === 'run-forward') {
+                    currentMove = 'run-forward'
                     mixer.update(playTimeClock.getDelta())
                 }
             });
 
+            enemyMixers.map(mixer => {
+                mixer.update(playTimeClock.getDelta())
+            })
+
             // Move player projectiles in their PointingTo position. Remove projectiles too far out
             shotObjects.forEach((projectile) => {
-                if (projectile.obj.name === "arrow") {
-                    let distance = Math.sqrt((projectile.initialX - projectile.destinationX) ** 2 + (projectile.initialZ - projectile.destinationZ) ** 2);
-                    projectile.obj.position.x += -(projectile.initialX - projectile.destinationX) / distance;
-                    projectile.obj.position.z += -(projectile.initialZ - projectile.destinationZ) / distance;
-                    if (Math.sqrt(projectile.obj.position.x ** 2 + projectile.obj.position.z ** 2) > 300) {
-                        scene.remove(projectile.obj);
-                    }
-                } else if (projectile.obj.name === "thunder") {
-                    projectile.position.y += -1;
+                let distance = Math.sqrt((projectile.initialX - projectile.destinationX) ** 2 + (projectile.initialZ - projectile.destinationZ) ** 2);
+                projectile.obj.position.x += -(projectile.initialX - projectile.destinationX) / distance;
+                projectile.obj.position.z += -(projectile.initialZ - projectile.destinationZ) / distance;
+                if (Math.sqrt(projectile.obj.position.x ** 2 + projectile.obj.position.z ** 2) > 300) {
+                    scene.remove(projectile.obj);
                 }
             })
 
