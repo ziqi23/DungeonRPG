@@ -1,0 +1,430 @@
+/*!************************************************************************************************************************************!*\
+  !*** css ./node_modules/css-loader/dist/cjs.js??ruleSet[1].rules[1].use[1]!./node_modules/sass-loader/dist/cjs.js!./src/index.css ***!
+  \************************************************************************************************************************************/
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+body {
+  line-height: 1;
+}
+
+ol, ul {
+  list-style: none;
+}
+
+blockquote, q {
+  quotes: none;
+}
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: "";
+  content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+#header {
+  position: absolute;
+  display: flex;
+  width: 95vw;
+  justify-content: space-between;
+  z-index: 20;
+}
+
+#loading-page {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  z-index: 100;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#loading-animation {
+  width: 30%;
+  height: 30%;
+}
+
+#enter-button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 20px;
+  color: white;
+  width: 100%;
+  height: 100%;
+  animation: 2s expand infinite alternate;
+}
+
+@keyframes expand {
+  from {
+    background-color: rgb(23, 22, 22);
+  }
+  to {
+    background-color: rgb(45, 45, 52);
+  }
+}
+.right {
+  width: 300px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+#github {
+  width: 200px;
+  height: 50px;
+}
+
+#linkedin {
+  width: 100px;
+  height: 50px;
+}
+
+#score {
+  color: rgb(82, 95, 108);
+  font-size: 36px;
+  /* background-color: azure; */
+}
+
+a {
+  width: inherit;
+  height: inherit;
+}
+
+img {
+  width: inherit;
+  height: inherit;
+  object-fit: contain;
+}
+
+canvas {
+  position: absolute;
+  z-index: 10;
+}
+
+#ui {
+  display: flex;
+  width: 100vw;
+  min-width: 1100px;
+  position: relative;
+  justify-content: space-between;
+  font-size: 20px;
+  font-weight: bold;
+  bottom: -6vh;
+  z-index: 20;
+}
+
+#skill-one {
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  left: 123px;
+  top: 8px;
+  border: 3px solid gold;
+  z-index: 30;
+}
+
+#skill-one img, #skill-two img {
+  object-fit: fill;
+}
+
+#skill-two {
+  width: 50px;
+  height: 50px;
+  position: absolute;
+  left: 181px;
+  top: 8px;
+  border: 3px solid black;
+  z-index: 30;
+}
+
+#health {
+  position: absolute;
+  left: 0.5vw;
+  top: 79vh;
+  width: 520px;
+  height: 140px;
+  z-index: 20;
+}
+
+#mana {
+  position: absolute;
+  right: 1vw;
+  top: 79vh;
+  width: 520px;
+  height: 140px;
+  z-index: 20;
+}
+
+#health div, #mana div {
+  position: absolute;
+}
+
+#hp-border {
+  position: absolute;
+  bottom: 2vh;
+}
+
+#mp-border {
+  position: absolute;
+  bottom: 1vh;
+  right: -0.6vw;
+}
+
+#hp-orb, #hp-shadow, #hp-highlight {
+  position: absolute;
+  bottom: 3.2vh;
+  left: 0.5vw;
+}
+
+#hp-orb {
+  /* filter: hue-rotate(180deg); */
+  display: flex;
+  filter: sepia(100%) hue-rotate(295deg) saturate(200%);
+  width: 210px;
+  height: 215px;
+  align-items: flex-end;
+}
+
+#hp-orb img {
+  width: inherit;
+  height: 215px;
+  object-fit: cover;
+  object-position: 50% 100%;
+}
+
+#mp-orb {
+  /* filter: hue-rotate(180deg); */
+  display: flex;
+  filter: sepia(100%) hue-rotate(175deg);
+  /* filter: hue-rotate(90deg); */
+  width: 210px;
+  height: 215px;
+  align-items: flex-end;
+}
+
+#mp-orb img {
+  width: inherit;
+  height: 215px;
+  object-fit: cover;
+  object-position: 50% 100%;
+}
+
+#mp-orb, #mp-shadow, #mp-highlight {
+  position: absolute;
+  bottom: 2.4vh;
+  right: 0.2vw;
+}
+
+body {
+  overflow: hidden;
+}
+
+#red {
+  border-radius: 15px;
+  overflow: hidden;
+  position: absolute;
+  top: 15px;
+  left: 280px;
+  width: 80px;
+  height: 100px;
+  z-index: 40;
+  opacity: 80%;
+  filter: saturate(200%);
+}
+
+#blue {
+  border-radius: 15px;
+  overflow: hidden;
+  position: absolute;
+  top: 15px;
+  left: 400px;
+  width: 80px;
+  height: 100px;
+  z-index: 40;
+  opacity: 80%;
+  filter: saturate(200%);
+}
+
+#potion-count {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-style: italic;
+  color: rgb(189, 189, 189);
+  top: 82vh;
+  left: 270px;
+}
+
+#mp-potion-count {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-style: italic;
+  color: rgb(189, 189, 189);
+  top: 82vh;
+  left: 390px;
+}
+
+#menu {
+  position: absolute;
+  left: 250px;
+  top: 79vh;
+  width: calc(100vw - 500px);
+  height: 130px;
+  z-index: 10;
+}
+
+#menu img {
+  object-fit: cover;
+}
+
+#task {
+  position: absolute;
+  left: 40vw;
+  top: 80vh;
+  z-index: 25;
+}
+
+#task h1 {
+  font-size: 20px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-style: italic;
+  color: rgb(189, 189, 189);
+  margin-bottom: 20px;
+}
+
+#task h2 {
+  width: 300px;
+  font-size: 14px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-style: italic;
+  color: rgb(189, 189, 189);
+}
+
+#exp {
+  position: absolute;
+  top: 92vh;
+  width: 100vw;
+  height: 20px;
+  z-index: 30;
+}
+
+#exp-bar {
+  object-fit: fill;
+  filter: grayscale(100%);
+  z-index: 30;
+}
+
+#dup-exp-bar {
+  position: absolute;
+  left: 2px;
+  top: 0px;
+  object-fit: cover;
+  filter: hue-rotate(170deg);
+  z-index: 30;
+}
+
+#endgame-stats {
+  position: absolute;
+  /* background-color: gray; */
+  visibility: hidden;
+  z-index: 100;
+  height: 70vh;
+  width: 70vw;
+  left: 15vw;
+  top: 5vh;
+}
+
+#endgame-stats img {
+  position: absolute;
+}
+
+#stats {
+  text-align: center;
+  font-size: 36px;
+  font-family: cursive;
+  color: rgb(56, 27, 27);
+  position: absolute;
+  top: 20vh;
+  left: 23vw;
+}
+
+#enemy-banner {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+  font-style: italic;
+  position: absolute;
+  z-index: 100;
+  top: 32px;
+  left: 43%;
+  font-size: 26px;
+  background-color: rgb(139, 54, 54);
+}
+
+#enemy-health-empty {
+  visibility: hidden;
+  background-color: black;
+  position: absolute;
+  z-index: 40;
+  bottom: -40px;
+  left: 15vw;
+  width: 70vw;
+  height: 40px;
+}
+
+#enemy-health-empty img {
+  position: absolute;
+  z-index: 40;
+  border-radius: 1px;
+  object-fit: cover;
+}
+
+#enemy-health-full {
+  visibility: hidden;
+  background-color: black;
+  position: absolute;
+  z-index: 40;
+  bottom: -40px;
+  left: 15vw;
+  width: 70vw;
+  height: 40px;
+}
+
+#enemy-health-full img {
+  position: absolute;
+  z-index: 40;
+  border-radius: 1px;
+  object-fit: cover;
+}

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./dist/main.css">
+    <script src="./dist/main.js" type="text/javascript" defer></script>
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico?">
+    <title>Space Defence</title>
+</head>
+<body id="body">
+    <audio autoplay id="background-music">
+        <source src="./assets/bg-music.mp3">
+    </audio>
+    <!-- <embed id="background-music" src="/assets/bg-music.mp3" muted="true" loop="true" autostart="true" hidden="true" style="position:absolute"> -->
+    <div id="loading-page">
+        <img id="loading-animation" src="./assets/loading.gif" />
+    </div>
+    <div id="header">
+        <div class="left">
+        </div>
+        <div class="right">
+            <div id="github"><a href="https://github.com/ziqi23/JS-Project" target="_blank"><img src="./assets/github.png"></a></div>
+            <div id="linkedin"><a href="https://www.linkedin.com/in/ziqi-zou/" target="_blank"><img src="./assets/linkedin.png"></a></div>
+        </div>
+    </div>
+    <div id="ui">
+        <div id="health">
+            <div id="red"><img src="./assets/redPot.png"></div>
+            <div id="blue"><img src="./assets/bluePot.png"></div>
+            <div id="hp-border"><img src="./assets/OrbBorder.png"></div>
+            <div id="hp-orb"><img id="hp-img" src="./assets/Orb.png"></div>
+            <div id="hp-highlight"><img src="./assets/OrbHighlight.png"></div>
+            <div id="hp-shadow"><img src="./assets/OrbShadow.png"></div>
+            <div id="hp-panel"><img src="./assets/HealthPanel.png"></div>
+        </div>
+        <div id="menu">
+            <img src="./assets/black-background.jpg">
+        </div>
+        <div id="enemy-health-empty">
+            <img src="./assets/EnemyHealthEmpty.png">
+        </div>
+        <div id="enemy-health-full">
+            <img src="./assets/EnemyHealthFull.png">
+        </div>
+        <div id="task">
+            <h1>Current Objective:</h1>
+            <h2>Destroy the space rocks to establish a clear line of sight between your cannon and the target!</h2>
+        </div>
+        <div id="mana">
+            <div id="skill-one">
+                <img src="./assets/ball.png">
+            </div>
+            <div id="skill-two">
+                <img src="./assets/lightning.png">
+            </div>
+            <div id="mp-border"><img src="./assets/OrbBorder.png"></div>
+            <div id="mp-orb"><img id="mp-img" src="./assets/Orb.png"></div>
+            <div id="mp-highlight"><img src="./assets/OrbHighlight.png"></div>
+            <div id="mp-shadow"><img src="./assets/OrbShadow.png"></div>
+            <div id="mp-panel"><img src="./assets/ManaPanel.png"></div>
+        </div>
+        <div id="exp">
+            <img id="exp-bar" src="./assets/exp.png">
+            <img id="dup-exp-bar" src="./assets/dup-exp.png">
+        </div>
+    </div>
+    <div id="endgame-stats">
+        <img src="./assets/menu.jpg">
+        <img src="./assets/menu-border.png">
+        <div id="stats"></div>
+        <div id="endgame-graph"></div>
+    </div>
+</body>
+</html>
