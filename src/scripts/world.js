@@ -4,7 +4,6 @@ import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 class World {
     constructor() {
-
         // Initialize scene, camera and lights
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 1, 1000);
@@ -25,6 +24,7 @@ class World {
         const material = new THREE.MeshStandardMaterial({map: desertTexture});
         const plane = new THREE.Mesh(geometry, material);
         plane.rotation.x = Math.PI / 2;
+        plane.castShadow = true;
         plane.receiveShadow = true;
         plane.name = "plane";
         scene.add(plane);
@@ -79,7 +79,7 @@ class World {
         }
 
         // Set camera location
-        camera.position.set(0, 20, 50);
+        camera.position.set(0, 50, 80);
 
         // Add handler for window resize
         window.addEventListener('resize', handleResize);

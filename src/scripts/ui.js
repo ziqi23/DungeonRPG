@@ -1,13 +1,15 @@
+import * as THREE from 'three';
+
 class Ui {
-    constructor() {
+    constructor(world) {
         // Set initial player attributes
+        this.scene = world.scene;
         this.health = 100;
         this.mana = 100;
         this.exp = 0;
         this.level = 1;
         this.potions = 3;
         this.manaPotions = 3;
-        this.enemyHealth = 10;
 
         // Fetch menu background image & border
         let backgroundImage = document.createElement("img");
@@ -88,6 +90,21 @@ class Ui {
             }
         })
 
+        // Handle skill selection - toggle using keys '1' and '2'
+        window.addEventListener("keydown", handleSkillToggle);
+        let currentSkill = 1;
+        function handleSkillToggle(e) {
+            if (e.key === '1') {
+                document.getElementById('skill-one').style.border = "3px solid gold";
+                document.getElementById('skill-two').style.border = "3px solid black";
+                currentSkill = 1;
+            } else if (e.key === '2') { 
+                document.getElementById('skill-two').style.border = "3px solid gold";
+                document.getElementById('skill-one').style.border = "3px solid black";
+                currentSkill = 2;
+            }
+        }
+
 
         // Another option to stop menu from displaying is to click anywhere on the screen
         document.addEventListener("mousedown", () => {
@@ -98,7 +115,19 @@ class Ui {
         })
         
     }
-    
+    displaySelectedEnemy(selectedEnemy) {
+        const boundingBox = new THREE.Box3().setFromObject(selectedEnemy);
+        let selectedEnemyGeometry = new THREE.RingGeometry(5, 6, 8);
+        const selectedEnemyMaterial = new THREE.MeshStandardMaterial({color: 0xFFFFFF, side: THREE.DoubleSide});
+        let selectedEnemyMesh = new THREE.Mesh(selectedEnemyGeometry, selectedEnemyMaterial);
+        selectedEnemyMesh.rotation.x = Math.PI / 2;
+        selectedEnemyMesh.position.x = (boundingBox.max.x + boundingBox.min.x) / 2;
+        selectedEnemyMesh.position.y = 0.1;
+        selectedEnemyMesh.position.z = (boundingBox.max.z + boundingBox.min.z) / 2;
+        this.scene.add(selectedEnemyMesh);
+        this.selectedEnemy = selectedEnemy;
+        return selectedEnemyMesh;
+    }
     // Function that is run at every frame to update UI based on current player health, exp, etc.
     buildUi() {
 
@@ -148,8 +177,14 @@ class Ui {
         el.style.width = `${this.exp}vw`
 
         // Update enemy health visual
-        const enemyHealth = document.getElementById("enemy-health-full")
-        enemyHealth.style.width = `${this.enemyHealth / 10 * 70}vw`
+        if (this.selectedEnemy) {
+            const enemyHealth = document.getElementById("enemy-health-full")
+            enemyHealth.style.width = `${this.selectedEnemy.health / 3 * 70}vw`
+            if (this.selectedEnemy.health === 0) {
+                document.getElementById('enemy-health-empty').style.visibility = 'hidden';
+                document.getElementById('enemy-health-full').style.visibility = 'hidden';
+            }
+        }
         
 
         // Update user level

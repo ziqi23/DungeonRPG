@@ -18,12 +18,12 @@ function handleMute(e) {
 
 let world = new World();
 let objects = new WorldObjects(world);
-let ui = new Ui()
+let ui = new Ui(world)
 let numLoads = 0;
 
 export function load() {
     numLoads += 1;
-    if (numLoads === 6) {
+    if (numLoads === 11) {
         const loadingPage = document.getElementById('loading-page')
         const loadingAnimation = document.getElementById('loading-animation')
         if (loadingAnimation) loadingPage.removeChild(loadingAnimation)
