@@ -13,6 +13,10 @@ class WorldObjects {
         this.enemyMixers = [];
         this.loadCharacter();   
         this.loadEnemies();
+        this.validSpawnCoords = [];
+        for (let i = -200; i < 200; i++) {
+            this.validSpawnCoords.push([i + (Math.random() - 0.5) * 50, 2, -(i + (Math.random() - 0.5) * 50)])
+        }
     }
 
     async loadCharacter() {
@@ -25,7 +29,6 @@ class WorldObjects {
                 if (c.isMesh) {
                     c.castShadow = true;
                     c.receiveShadow = false;
-                    c.geometry.computeVertexNormals();
                 }
             });
             const animation = new FBXLoader();
@@ -52,6 +55,7 @@ class WorldObjects {
                 mixer.clipAction(animation.animations[0]).play();
             })
             fbx.name = 'player';
+            fbx.position.y = 2;
             that.scene.add(fbx);
             that.camera.lookAt(fbx.position);
             load();
@@ -73,18 +77,24 @@ class WorldObjects {
                 animation.load("./assets/zombie/zombie-idle.fbx", (animation) => {
                     let clip = animation.animations[0]
                     let renamedClip = new THREE.AnimationClip('idle', clip.duration, clip.tracks);
-                    enemyMixer.clipAction(renamedClip).play();
+                    enemyMixer.clipAction(renamedClip);
                 })
                 const animation2 = new FBXLoader();
                 animation2.load("./assets/zombie/zombie-attack.fbx", (animation) => {
                     let clip = animation.animations[0]
                     let renamedClip = new THREE.AnimationClip('attack', clip.duration, clip.tracks);
-                    enemyMixer.clipAction(renamedClip).play();
+                    enemyMixer.clipAction(renamedClip);
+                })
+                const animation3 = new FBXLoader();
+                animation3.load("./assets/zombie/zombie-running.fbx", (animation) => {
+                    let clip = animation.animations[0]
+                    let renamedClip = new THREE.AnimationClip('running', clip.duration, clip.tracks);
+                    enemyMixer.clipAction(renamedClip);
                 })
                 this.enemyMixers.push(enemyMixer);
                 fbx.scale.setScalar(0.04);
-                fbx.position.x = (Math.random() - 0.5) * 70;
-                fbx.position.z = Math.random() * -100 - 25;
+                fbx.position.set(...this.validSpawnCoords[Math.floor(Math.random() * this.validSpawnCoords.length)])
+                fbx.rotation.y = Math.random() * Math.PI;
                 fbx.name = "enemy";
                 fbx.health = 3;
                 fbx.nametag = 'Zombie';
@@ -92,7 +102,6 @@ class WorldObjects {
                 fbx.clock = new THREE.Clock();
                 this.scene.add(fbx);
                 this.enemies.push(fbx);
-                console.log(this.enemyMixers)
                 load();
             })
         }

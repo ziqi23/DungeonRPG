@@ -7,7 +7,6 @@ class WorldLogic {
         this.scene = world.scene;
         this.camera = world.camera;
         this.renderer = world.renderer;
-        this.plane = world.plane;
         this.worldObjects = worldObjects;
         this.enemies = worldObjects.enemies;
         this.enemyMixers = worldObjects.enemyMixers;
@@ -22,9 +21,9 @@ class WorldLogic {
         let worldObjects = this.worldObjects;
         let mixers = this.mixers;
         let enemyMixers = this.enemyMixers;
+        let previousMove = 'idle';
         let currentMove = 'idle';
         let scene = this.scene;
-        let plane = this.plane;
         let camera = this.camera;
         let renderer = this.renderer;
         let ui = this.ui;
@@ -84,7 +83,7 @@ class WorldLogic {
                 document.getElementById('enemy-health-full').style.visibility = 'visible';
             }
             if (selectedEnemyMesh) scene.remove(selectedEnemyMesh);
-            selectedEnemyMesh = ui.displaySelectedEnemy(selectedEnemy);
+            if (selectedEnemy) selectedEnemyMesh = ui.displaySelectedEnemy(selectedEnemy);
         }
 
         // Sort enemies
@@ -137,86 +136,104 @@ class WorldLogic {
         document.addEventListener("keydown", handleShoot)
         let shotObjects = [];
         
+        let skillClock = new THREE.Clock();
+        skillClock.getDelta();
+        let cooldown = 0.5;
         function handleShoot(e) {
             // Determine skill to cast and execute associated logic
-            if (e.key === '1' && ui.mana >= 1) {
+            let distanceX = pointingTo.x - objects.player.position.x;
+            let distanceZ = pointingTo.z - objects.player.position.z;      
+            if (e.key === '1' && ui.mana >= 1 && skillClock.getDelta() >= cooldown) {
+                document.removeEventListener("keydown", handleShoot)
+                setTimeout(() => document.addEventListener("keydown", handleShoot), 600)
                 idle = true;
                 firing = true;
                 objects.player.lookAt(new THREE.Vector3(pointingTo.x, 0, pointingTo.z));
-                const loader = new OBJLoader();
-                // const rockTexture = new THREE.TextureLoader().load('./assets/rocktexture.jpg');
-                loader.load("./assets/player/arrow.obj", function(obj) {
-                    obj.position.x = objects.player.position.x;
-                    obj.position.y = objects.player.position.y + 2;
-                    obj.position.z = objects.player.position.z;
-                    console.log(obj.quaternion)
-                    // obj.quaternion.copy(objects.player.quaternion)
-                    obj.rotation.y += Math.PI / 4;
-                    console.log(obj.quaternion)
-                    obj.scale.setScalar(0.1);
-                    obj.name = "arrow";
-                    let audio = new Audio("./assets/laser-gun-shot.wav");
-                    if (!muted) audio.play();
-                    shotCount += 1;
-                    ui.mana -= 1;
-                    shotObjects.push({
-                        obj, 
-                        initialX: objects.player.position.x, 
-                        initialZ: objects.player.position.z, 
-                        destinationX: pointingTo.x, 
-                        destinationZ: pointingTo.z
-                    });
-                    scene.add(obj);
-                })
-            } else if (e.key === '2' && ui.mana >= 3) {
-                idle = true;
-                firing = true;
-                objects.player.lookAt(new THREE.Vector3(pointingTo.x, 0, pointingTo.z));
-                let audio = new Audio("./assets/shock-spell.mp3");
-                if (!muted) audio.play();
-                shotCount += 1;
-                ui.mana -= 3;
-                const loader = new OBJLoader();
-                loader.load("./assets/player/arrow.obj", function(obj) {
-                    for (let i = 0; i < 3; i++) {
-                        obj.position.x = objects.player.position.x;
-                        obj.position.y = objects.player.position.y + 2;
-                        obj.position.z = objects.player.position.z;
-                        console.log(obj.quaternion)
-                        // obj.quaternion.copy(objects.player.quaternion)
-                        obj.rotation.y += Math.PI / 4;
-                        console.log(obj.quaternion)
-                        obj.scale.setScalar(0.1);
-                        obj.name = "multiArrow";
-
-                        let modifier;
-                        switch (i) {
-                            case 0:
-                                modifier = -20;
-                            case 1:
-                                modifier = 0;
-                            case 2:
-                                modifier = 20;
-                            default:
-                                break;
-                        }
+                setTimeout(() => {
+                    const loader = new FBXLoader();
+                    loader.load("./assets/player/arrow3.fbx", function(fbx) {
+                        fbx.position.x = objects.player.position.x;
+                        fbx.position.y = objects.player.position.y + 5;
+                        fbx.position.z = objects.player.position.z;
+                        fbx.rotation.z = Math.PI / 2
+                        if (distanceZ > 0) {
+                            fbx.rotation.y = Math.atan(distanceX / distanceZ) - Math.PI / 2
+                        } else {
+                            fbx.rotation.y = Math.atan(distanceX / distanceZ) + Math.PI / 2
+                        }              
+                        fbx.scale.setScalar(0.5);
+                        fbx.name = "arrow";
+                        let audio = new Audio("./assets/laser-gun-shot.wav");
+                        if (!muted) audio.play();
+                        shotCount += 1;
+                        ui.mana -= 1;
                         shotObjects.push({
-                            obj, 
+                            obj: fbx, 
                             initialX: objects.player.position.x, 
                             initialZ: objects.player.position.z, 
-                            destinationX: pointingTo.x + modifier, 
+                            destinationX: pointingTo.x, 
                             destinationZ: pointingTo.z
                         });
-                        scene.add(obj);
+                        scene.add(fbx);
+                    })
+                }, 400)
+            } else if (e.key === '2' && ui.mana >= 3 && skillClock.getDelta() >= cooldown) {
+                document.removeEventListener("keydown", handleShoot)
+                setTimeout(() => document.addEventListener("keydown", handleShoot), 600)
+                idle = true;
+                firing = true;
+                objects.player.lookAt(new THREE.Vector3(pointingTo.x, 0, pointingTo.z));
+                setTimeout(() => {
+                    let audio = new Audio("./assets/shock-spell.mp3");
+                    if (!muted) audio.play();
+                    shotCount += 1;
+                    ui.mana -= 3;
+                    const loader = new FBXLoader();
+                    for (let i = 0; i < 3; i++) {
+                        loader.load("./assets/player/arrow3.fbx", function(fbx) {
+                            fbx.position.x = objects.player.position.x;
+                            fbx.position.y = objects.player.position.y + 2;
+                            fbx.position.z = objects.player.position.z;
+                            fbx.rotation.z = Math.PI / 2
+                            if (distanceZ > 0) {
+                                fbx.rotation.y = Math.atan(distanceX / distanceZ) - Math.PI / 2
+                            } else {
+                                fbx.rotation.y = Math.atan(distanceX / distanceZ) + Math.PI / 2
+                            }   
+                            fbx.scale.setScalar(0.5);
+                            fbx.name = "multiArrow";
+    
+                            let modifier;
+                            switch (i) {
+                                case 0:
+                                    modifier = 0.8;
+                                    break;
+                                case 1:
+                                    modifier = 1;
+                                    break;
+                                case 2:
+                                    modifier = 1.2;
+                                    break;
+                                default:
+                                    break;
+                            }
+                            shotObjects.push({
+                                obj: fbx, 
+                                initialX: objects.player.position.x, 
+                                initialZ: objects.player.position.z, 
+                                destinationX: pointingTo.x * modifier, 
+                                destinationZ: pointingTo.z * modifier
+                            });
+                            scene.add(fbx);
+                        })
                     }
-                })
+                }, 400)
             }
         }
 
         // Once all logic established above, run update() which handles frame by frame rendering
         function update() {
             requestAnimationFrame(update);
-            // Call WorldObjects#Move method to handle movement
             worldObjects.move();
 
             if (!idle) {
@@ -229,72 +246,108 @@ class WorldLogic {
                 }
                 else {
                     // face this direction and move at constant speed
-                    objects.player.lookAt(new THREE.Vector3(movingTo.x, 0, movingTo.z));
+                    objects.player.lookAt(new THREE.Vector3(movingTo.x, 2, movingTo.z));
                     objects.player.position.x += speed * xDelta / distance;
                     camera.position.x += speed * xDelta / distance;
                     objects.player.position.z += speed * zDelta / distance;
                     camera.position.z += speed * zDelta / distance;
                 }
-
             }
             let currentAnimation;
+            let previousAnimation;
             for (let i in mixers) {
                 if (mixers[i].name === currentMove) {
                     currentAnimation = mixers[i]
                 }
+                if (mixers[i].name === previousMove) {
+                    previousAnimation = mixers[i]
+                }
             }
+            const delta = playTimeClock.getDelta();
+            let timeout;
             mixers.map(mixer => {
                 if (firing && mixer.name === 'draw-arrow') {
                     currentMove = 'draw-arrow'
                     idle = true;
-                    setTimeout(() => firing = false, 1000)
-                    mixer.update(playTimeClock.getDelta())
+                    if (timeout) {
+                        clearTimeout(timeout);
+                        timeout = null;
+                    }
+                    timeout = setTimeout(() => firing = false, 500);
+                    if (currentMove !== previousMove) {
+                        previousMove = currentMove;
+                        previousAnimation._actions[0].stop()
+                        currentAnimation._actions[0].play()
+                    }
+                    mixer.update(delta * 2)
                 }
                 else if (!firing && idle && mixer.name === 'idle') {
                     currentMove = 'idle'
-                    mixer.update(playTimeClock.getDelta())
+                    if (currentMove !== previousMove) {
+                        previousMove = currentMove;
+                        previousAnimation._actions[0].stop()
+                        currentAnimation._actions[0].play()
+                    }
+                    mixer.update(delta)
                 }
                 else if (!firing && !idle && mixer.name === 'run-forward') {
                     currentMove = 'run-forward'
-                    mixer.update(playTimeClock.getDelta())
+                    if (currentMove !== previousMove) {
+                        previousMove = currentMove;
+                        previousAnimation._actions[0].stop()
+                        currentAnimation._actions[0].play()
+                    }
+                    mixer.update(delta)
                 }
             });
 
-            // enemies.forEach(enemy => {
-            //     enemyMixers.clipenemy.animations[0]
-            // })
             enemyMixers.forEach(mixer => {
                 // find root and play clip according to position
                 let enemy = scene.getObjectByProperty('uuid', mixer._root.uuid);
-                let xDistance = (enemy.position.x - objects.player.position.x);
-                let zDistance = (enemy.position.z - objects.player.position.z);
-                let distance = Math.sqrt(xDistance ** 2 + zDistance ** 2);
-                let speed = 0.2;
-                if ((distance > 1 && distance < 50) || enemy.health < 3) {
-                    enemy.position.x -= xDistance / distance * speed;
-                    enemy.position.z -= zDistance / distance * speed;
-                    mixer.existingAction(mixer._actions[1]._clip).play(); // Attack                    
-                }
-                else if (distance >= 0 && distance <= 1) {
-                    if (that.worldObjects.objectsBoundingBox[enemy.uuid]?.intersectsBox(that.worldObjects.objectsBoundingBox[objects.player.uuid])) {
-                        if (Math.floor(enemy.clock.getElapsedTime()) > 1) {
-                            enemy.clock.start();
-                            objects.player.collided = true;
+                if (enemy) {
+                    let xDistance = (enemy.position.x - objects.player.position.x);
+                    let zDistance = (enemy.position.z - objects.player.position.z);
+                    let distance = Math.sqrt(xDistance ** 2 + zDistance ** 2);
+                    let speed = 0.2;
+                    if ((distance > 1 && distance < 50) || enemy.health < 3) {
+                        if (zDistance > 0) {
+                            enemy.rotation.y = Math.atan(xDistance / zDistance) - Math.PI / 4
+                        } else {
+                            enemy.rotation.y = Math.atan(xDistance / zDistance) + Math.PI / 4
+                        }   
+                        enemy.position.x -= xDistance / distance * speed;
+                        enemy.position.z -= zDistance / distance * speed;
+                        mixer.existingAction(mixer._actions[0]._clip).stop();
+                        mixer.existingAction(mixer._actions[1]._clip).stop();
+                        mixer.existingAction(mixer._actions[2]._clip).play(); // Run 
+                    }
+                    else if (distance >= 0 && distance <= 1) {
+                        // mixer.stopAllAction()
+                        mixer.existingAction(mixer._actions[0]._clip).stop();
+                        mixer.existingAction(mixer._actions[2]._clip).stop();
+                        mixer.existingAction(mixer._actions[1]._clip).play(); // Attack  
+                        if (that.worldObjects.objectsBoundingBox[enemy.uuid]?.intersectsBox(that.worldObjects.objectsBoundingBox[objects.player.uuid])) {
+                            if (Math.floor(enemy.clock.getElapsedTime()) > 1) {
+                                enemy.clock.start();
+                                objects.player.collided = true;
+                            }
                         }
                     }
+                    else {
+                        // mixer.stopAllAction()
+                        mixer.existingAction(mixer._actions[2]._clip).stop();
+                        mixer.existingAction(mixer._actions[1]._clip).stop();
+                        mixer.existingAction(mixer._actions[0]._clip).play(); // Idle
+                    }
+                    mixer.update(enemy.clock.getDelta())
                 }
-                else {
-                    mixer.existingAction(mixer._actions[0]._clip).play(); // Idle
-                }
-                
-                mixer.update(playTimeClock.getDelta())
             })
 
             // Move player projectiles in their PointingTo position. Remove projectiles too far out
             shotObjects.forEach((projectile) => {
                 let distance = Math.sqrt((projectile.initialX - projectile.destinationX) ** 2 + (projectile.initialZ - projectile.destinationZ) ** 2);
-                projectile.obj.position.x += -(projectile.initialX - projectile.destinationX) / distance;
-                projectile.obj.position.z += -(projectile.initialZ - projectile.destinationZ) / distance;
+                projectile.obj.position.x += -(projectile.initialX - projectile.destinationX) / distance * 5;
+                projectile.obj.position.z += -(projectile.initialZ - projectile.destinationZ) / distance * 5;
                 if (Math.sqrt(projectile.obj.position.x ** 2 + projectile.obj.position.z ** 2) > 300) {
                     scene.remove(projectile.obj);
                 }
@@ -309,7 +362,18 @@ class WorldLogic {
                             if (!muted) audio.play();
                             scene.remove(object.obj)
                             object2.health -= 1;
-                            if (object2.health === 0) object2.collided = true;
+                            if (object2.health === 0) {
+                                object2.collided = true;
+                                if (selectedEnemy === object2) {
+                                    selectedEnemy = null;
+                                }
+                            }
+                            else {
+                                document.getElementById('enemy-health-empty').style.visibility = 'visible';
+                                document.getElementById('enemy-health-full').style.visibility = 'visible';
+                                selectedEnemy = object2;
+                                ui.displaySelectedEnemy(selectedEnemy);
+                            }
                         }
                     }
                 })
@@ -341,7 +405,7 @@ class WorldLogic {
                         selectedEnemyIdx -= 1;
                     }
                     enemies.splice(enemies.indexOf(enemy), 1);
-                } 
+                }
             })
 
             // Handle player hit by enemy projectile, one second timeout between hits registering

@@ -97,10 +97,22 @@ class Ui {
             if (e.key === '1') {
                 document.getElementById('skill-one').style.border = "3px solid gold";
                 document.getElementById('skill-two').style.border = "3px solid black";
+                document.getElementById('skill-one').style.filter = "grayscale(1)";
+                document.getElementById('skill-two').style.filter = "grayscale(1)";
+                setTimeout(() => {
+                    document.getElementById('skill-one').style.filter = "none";
+                    document.getElementById('skill-two').style.filter = "none";
+                }, 600)
                 currentSkill = 1;
             } else if (e.key === '2') { 
                 document.getElementById('skill-two').style.border = "3px solid gold";
                 document.getElementById('skill-one').style.border = "3px solid black";
+                document.getElementById('skill-one').style.filter = "grayscale(1)";
+                document.getElementById('skill-two').style.filter = "grayscale(1)";
+                setTimeout(() => {
+                    document.getElementById('skill-one').style.filter = "none";
+                    document.getElementById('skill-two').style.filter = "none";
+                }, 600)
                 currentSkill = 2;
             }
         }
@@ -122,7 +134,7 @@ class Ui {
         let selectedEnemyMesh = new THREE.Mesh(selectedEnemyGeometry, selectedEnemyMaterial);
         selectedEnemyMesh.rotation.x = Math.PI / 2;
         selectedEnemyMesh.position.x = (boundingBox.max.x + boundingBox.min.x) / 2;
-        selectedEnemyMesh.position.y = 0.1;
+        selectedEnemyMesh.position.y = 2;
         selectedEnemyMesh.position.z = (boundingBox.max.z + boundingBox.min.z) / 2;
         this.scene.add(selectedEnemyMesh);
         this.selectedEnemy = selectedEnemy;
