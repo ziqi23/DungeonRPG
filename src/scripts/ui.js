@@ -127,18 +127,31 @@ class Ui {
         })
         
     }
-    displaySelectedEnemy(selectedEnemy) {
-        const boundingBox = new THREE.Box3().setFromObject(selectedEnemy);
-        let selectedEnemyGeometry = new THREE.RingGeometry(5, 6, 8);
-        const selectedEnemyMaterial = new THREE.MeshStandardMaterial({color: 0xFFFFFF, side: THREE.DoubleSide});
-        let selectedEnemyMesh = new THREE.Mesh(selectedEnemyGeometry, selectedEnemyMaterial);
-        selectedEnemyMesh.rotation.x = Math.PI / 2;
-        selectedEnemyMesh.position.x = (boundingBox.max.x + boundingBox.min.x) / 2;
-        selectedEnemyMesh.position.y = 2;
-        selectedEnemyMesh.position.z = (boundingBox.max.z + boundingBox.min.z) / 2;
-        this.scene.add(selectedEnemyMesh);
+    displaySelectedEnemy(selectedEnemyMesh, selectedEnemy) {
+        if (!selectedEnemy) {
+            return;
+        }
         this.selectedEnemy = selectedEnemy;
-        return selectedEnemyMesh;
+        const boundingBox = new THREE.Box3().setFromObject(selectedEnemy);
+        let position = {
+            x: (boundingBox.max.x + boundingBox.min.x) / 2,
+            y: 2,
+            z: (boundingBox.max.z + boundingBox.min.z) / 2
+        }
+
+        if (!selectedEnemyMesh) {
+            const selectedEnemyGeometry = new THREE.RingGeometry(5, 6, 30);
+            const selectedEnemyMaterial = new THREE.MeshStandardMaterial({color: 0xFFFFFF, side: THREE.DoubleSide});
+            const mesh = new THREE.Mesh(selectedEnemyGeometry, selectedEnemyMaterial);
+            mesh.rotation.x = Math.PI / 2;
+            mesh.position.set(position.x, position.y, position.z);
+            this.scene.add(mesh);
+            return mesh;
+        }
+        else {
+            selectedEnemyMesh.position.set(position.x, position.y, position.z);
+            return selectedEnemyMesh
+        }
     }
     // Function that is run at every frame to update UI based on current player health, exp, etc.
     buildUi() {
@@ -191,7 +204,7 @@ class Ui {
         // Update enemy health visual
         if (this.selectedEnemy) {
             const enemyHealth = document.getElementById("enemy-health-full")
-            enemyHealth.style.width = `${this.selectedEnemy.health / 3 * 70}vw`
+            enemyHealth.style.width = `${this.selectedEnemy.health / this.selectedEnemy.maxHealth * 70}vw`
             if (this.selectedEnemy.health === 0) {
                 document.getElementById('enemy-health-empty').style.visibility = 'hidden';
                 document.getElementById('enemy-health-full').style.visibility = 'hidden';
