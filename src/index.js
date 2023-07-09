@@ -23,7 +23,7 @@ let numLoads = 0;
 
 export function load() {
     numLoads += 1;
-    if (numLoads === 13) {
+    if (numLoads === 37) {
         const loadingPage = document.getElementById('loading-page')
         const loadingAnimation = document.getElementById('loading-animation')
         if (loadingAnimation) loadingPage.removeChild(loadingAnimation)

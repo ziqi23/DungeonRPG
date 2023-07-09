@@ -18,6 +18,9 @@ class WorldObjects {
         for (let i = -200; i < 200; i++) {
             this.validSpawnCoords.push([i + (Math.random() - 0.5) * 50, 1, -(i + (Math.random() - 0.5) * 50)])
         }
+        for (let i = 0; i < 100; i++) {
+            this.validSpawnCoords.push([-250 + 3 * i + (Math.random() - 0.5) * 50, 1, -370 + 2 * i + (Math.random() - 0.5) * 50])
+        }
     }
 
     // Load player model
@@ -68,7 +71,7 @@ class WorldObjects {
     // Load enemy model
     async loadEnemies() {
         const loader = new FBXLoader();
-        for (let i = 0; i < 10; i++) {
+        for (let i = 0; i < 30; i++) {
             loader.load('./assets/zombie/zombie-model.fbx', (fbx) => {
                 let enemyMixer = new THREE.AnimationMixer(fbx);
                 fbx.traverse(c => {

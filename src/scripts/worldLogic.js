@@ -93,42 +93,44 @@ class WorldLogic {
         
         // Play enemy animations
         enemyMixers.forEach(mixer => {
-            mixer.addEventListener('finished', (e) => {
-                let idleClip;
-                let runningClip;
-                let attackClip;
-                mixer._actions.forEach(action => {
-                    if (action._clip.name === 'idle') {
-                        idleClip = action._clip
-                    }
-                    if (action._clip.name === 'running') {
-                        runningClip = action._clip
-                    }
-                    if (action._clip.name === 'attack') {
-                        attackClip = action._clip
-                    }
-                })
-                let enemy = mixer.getRoot();
-                let xDistance = (enemy.position.x - player.position.x);
-                let zDistance = (enemy.position.z - player.position.z);
-                let distance = Math.sqrt(xDistance ** 2 + zDistance ** 2);
-                if ((distance > 5 && distance < 50) || enemy.health < enemy.maxHealth) {
-                    mixer.existingAction(runningClip).reset();
-                    mixer.existingAction(runningClip).play(); // Run 
-                    enemy.moving = true;
+            mixer.addEventListener('finished', handleEnemyAnimation);
+        })
+
+        function handleEnemyAnimation(e) {
+            let idleClip;
+            let runningClip;
+            let attackClip;
+            this._actions.forEach(action => {
+                if (action._clip.name === 'idle') {
+                    idleClip = action._clip
                 }
-                else if (distance <= 5) {
-                    mixer.existingAction(attackClip).reset();
-                    mixer.existingAction(attackClip).play(); // Attack  
-                    enemy.moving = false;
+                if (action._clip.name === 'running') {
+                    runningClip = action._clip
                 }
-                else {
-                    mixer.existingAction(idleClip).reset();
-                    mixer.existingAction(idleClip).play(); // Idle
-                    enemy.moving = false;
+                if (action._clip.name === 'attack') {
+                    attackClip = action._clip
                 }
             })
-        })
+            let enemy = this.getRoot();
+            let xDistance = (enemy.position.x - player.position.x);
+            let zDistance = (enemy.position.z - player.position.z);
+            let distance = Math.sqrt(xDistance ** 2 + zDistance ** 2);
+            if ((distance > 5 && distance < 50) || (distance > 5 && enemy.health < enemy.maxHealth)) {
+                this.existingAction(runningClip).reset();
+                this.existingAction(runningClip).play(); // Run 
+                enemy.moving = true;
+            }
+            else if (distance <= 5) {
+                this.existingAction(attackClip).reset();
+                this.existingAction(attackClip).play(); // Attack  
+                enemy.moving = false;
+            }
+            else {
+                this.existingAction(idleClip).reset();
+                this.existingAction(idleClip).play(); // Idle
+                enemy.moving = false;
+            }
+        }
         
         // Utilize three.js raycaster to determine the coordinates at which cursor is pointed to
         const raycaster = new THREE.Raycaster();
@@ -148,7 +150,6 @@ class WorldLogic {
                 pointingTo.z = intersects[0].point.z;
             }
         }
-
         // Handle player movement - left mouse button
         window.addEventListener("mousedown", handlePlayerMove);
         function handlePlayerMove(e) {
@@ -167,7 +168,9 @@ class WorldLogic {
         function handleShoot(e) {
             // Determine skill to cast and execute associated logic
             let distanceX = pointingTo.x - player.position.x;
-            let distanceZ = pointingTo.z - player.position.z;      
+            let distanceZ = pointingTo.z - player.position.z;    
+            let x = pointingTo.x;
+            let z = pointingTo.z;  
             if (e.key === '1' && ui.mana >= 1 && skillClock.getDelta() >= cooldown) {
                 document.removeEventListener("keydown", handleShoot)
                 setTimeout(() => document.addEventListener("keydown", handleShoot), 600)
@@ -197,8 +200,8 @@ class WorldLogic {
                             obj: fbx, 
                             initialX: player.position.x, 
                             initialZ: player.position.z, 
-                            destinationX: pointingTo.x, 
-                            destinationZ: pointingTo.z
+                            destinationX: x, 
+                            destinationZ: z
                         });
                         scene.add(fbx);
                     })
@@ -248,8 +251,8 @@ class WorldLogic {
                                 obj: fbx, 
                                 initialX: player.position.x, 
                                 initialZ: player.position.z, 
-                                destinationX: pointingTo.x * modifier, 
-                                destinationZ: pointingTo.z * modifier
+                                destinationX: x * modifier, 
+                                destinationZ: z * modifier
                             });
                             scene.add(fbx);
                         })
@@ -258,6 +261,16 @@ class WorldLogic {
             }
         }
         
+        function debounce(func, timeout = 300){
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => { func.apply(this, args); }, timeout);
+            };
+        }
+        
+        let handler = debounce(() => firing = false, 500);
+
         // Once all logic established above, run update() which handles frame by frame rendering
         let frame = 0;
         function update() {
@@ -305,16 +318,12 @@ class WorldLogic {
                 }
             }
             const delta = playTimeClock.getDelta();
-            let timeout;
             mixers.map(mixer => {
+                console.log(firing)
                 if (firing && mixer.name === 'draw-arrow') {
                     currentMove = 'draw-arrow'
                     idle = true;
-                    if (timeout) {
-                        clearTimeout(timeout);
-                        timeout = null;
-                    }
-                    timeout = setTimeout(() => firing = false, 500);
+                    handler();
                     if (currentMove !== previousMove) {
                         previousMove = currentMove;
                         previousAnimation._actions[0].stop()
@@ -350,33 +359,46 @@ class WorldLogic {
                     let zDistance = (enemy.position.z - player.position.z);
                     let distance = Math.sqrt(xDistance ** 2 + zDistance ** 2);
                     let speed = 0.2;
-                    if (enemy.moving && ((distance > 5 && distance < 50) || enemy.health < enemy.maxHealth)) {
-                        if (zDistance > 0) {
-                            enemy.rotation.y = Math.atan(xDistance / zDistance) - 7 * Math.PI / 8
-                        } else {
-                            enemy.rotation.y = Math.atan(xDistance / zDistance) + Math.PI / 8
-                        }   
-                        enemy.position.x -= xDistance / distance * speed;
-                        enemy.position.z -= zDistance / distance * speed;
+                    if (((distance > 5 && distance < 50) || enemy.health < enemy.maxHealth)) {
+                        enemy.currentMove = 'running'
+                        if (enemy.moving) {
+                            if (zDistance > 0) {
+                                enemy.rotation.y = Math.atan(xDistance / zDistance) - 7 * Math.PI / 8
+                            } else {
+                                enemy.rotation.y = Math.atan(xDistance / zDistance) + Math.PI / 8
+                            }   
+                            enemy.position.x -= xDistance / distance * speed;
+                            enemy.position.z -= zDistance / distance * speed;
+                        }
                     }
                     else if (distance <= 5) {
                         if (that.worldObjects.objectsBoundingBox[enemy.uuid]?.intersectsBox(that.worldObjects.objectsBoundingBox[player.uuid])) {
+                            enemy.currentMove = 'attack'
                             // if (Math.floor(enemy.clock.getElapsedTime()) > 1) {
                             //     enemy.clock.start();
                             //     player.collided = true;
                             // }
                         }
+                    } else {
+                        enemy.currentMove = 'idle'
                     }
+                    if (enemy.currentMove !== enemy.prevMove) {
+                        handleEnemyAnimation.bind(mixer)();
+                    }
+                    enemy.prevMove = enemy.currentMove
                     mixer.update(enemy.clock.getDelta())
                 }
             })
 
             // Move player projectiles in their PointingTo position. Remove projectiles too far out
             shotObjects.forEach((projectile) => {
-                let distance = Math.sqrt((projectile.initialX - projectile.destinationX) ** 2 + (projectile.initialZ - projectile.destinationZ) ** 2);
-                projectile.obj.position.x += -(projectile.initialX - projectile.destinationX) / distance * 5;
-                projectile.obj.position.z += -(projectile.initialZ - projectile.destinationZ) / distance * 5;
-                if (Math.sqrt(projectile.obj.position.x ** 2 + projectile.obj.position.z ** 2) > 300) {
+                let xDelta = projectile.initialX - projectile.destinationX;
+                let zDelta = projectile.initialZ - projectile.destinationZ;
+                let distance = Math.sqrt(xDelta ** 2 + zDelta ** 2);
+                projectile.obj.position.x += -xDelta / distance * 5;
+                projectile.obj.position.z += -zDelta / distance * 5;
+                if (Math.sqrt((projectile.obj.position.x - projectile.initialX) ** 2 + 
+                              (projectile.obj.position.z - projectile.initialZ) ** 2) > 300) {
                     scene.remove(projectile.obj);
                 }
             })
@@ -390,7 +412,7 @@ class WorldLogic {
                             if (!muted) audio.play();
                             scene.remove(object.obj)
                             object2.health -= 1;
-                            if (object2.health === 0) {
+                            if (object2.health <= 0) {
                                 object2.collided = true;
                                 if (selectedEnemy === object2) {
                                     selectedEnemy = null;
@@ -407,16 +429,6 @@ class WorldLogic {
                 })
             })
 
-            // Show enemy banner if selected
-            if (selectedEnemy && !document.getElementById('enemy-banner')) {
-                const banner = document.createElement('div');
-                banner.id = 'enemy-banner';
-                document.getElementById('body').appendChild(banner);
-                banner.innerHTML = selectedEnemy.nametag
-            }
-            else if (!selectedEnemy) {
-                document.getElementById('enemy-banner')?.remove();
-            }
 
             // Handle enemies hit by player projectiles
             enemies.forEach((enemy) => {

@@ -130,6 +130,33 @@ class World {
         plane4.name = "plane";
         scene.add(plane4);
 
+        const mtlLoader = new MTLLoader();
+        mtlLoader.load('./assets/world/concrete_house.mtl', (materials) => {
+            materials.preload();
+            const objLoader = new OBJLoader();
+            objLoader.setMaterials(materials);
+            objLoader.load('./assets/world/concrete_house.obj', obj => {
+                obj.scale.setScalar(1.5);
+                obj.position.set(-250, 1, -450);
+                scene.add(obj);
+                load()
+            })
+        })
+
+        const mtlLoader2 = new MTLLoader();
+        mtlLoader2.load('./assets/world/concrete_house.mtl', (materials) => {
+            materials.preload();
+            const objLoader = new OBJLoader();
+            objLoader.setMaterials(materials);
+            objLoader.load('./assets/world/concrete_house.obj', obj => {
+                obj.rotation.y = Math.PI / 2;
+                obj.scale.setScalar(1.5);
+                obj.position.set(-300, 1, -400);
+                scene.add(obj);
+                load()
+            })
+        })
+
         // Add handler for window resize
         window.addEventListener('resize', handleResize);
         

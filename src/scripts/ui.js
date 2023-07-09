@@ -146,6 +146,16 @@ class Ui {
     }
 
     displaySelectedEnemy(selectedEnemyMesh, selectedEnemy) {
+        if (selectedEnemy && !document.getElementById('enemy-banner')) {
+            const banner = document.createElement('div');
+            banner.id = 'enemy-banner';
+            document.getElementById('body').appendChild(banner);
+            banner.innerHTML = selectedEnemy.nametag
+        }
+        else if (!selectedEnemy) {
+            document.getElementById('enemy-banner')?.remove();
+        }
+
         if (!selectedEnemy) {
             return;
         }
@@ -223,7 +233,7 @@ class Ui {
         if (this.selectedEnemy) {
             const enemyHealth = document.getElementById("enemy-health-full")
             enemyHealth.style.width = `${this.selectedEnemy.health / this.selectedEnemy.maxHealth * 70}vw`
-            if (this.selectedEnemy.health === 0) {
+            if (this.selectedEnemy.health <= 0) {
                 document.getElementById('enemy-health-empty').style.visibility = 'hidden';
                 document.getElementById('enemy-health-full').style.visibility = 'hidden';
             }
