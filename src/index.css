@@ -50,7 +50,7 @@ table {
 #header {
     position: absolute;
     display: flex;
-    width: 95vw;
+    width: 100vw;
     justify-content: space-between;
     z-index: 20;
 }
@@ -93,20 +93,24 @@ table {
 }
 
 .right{
-    width: 300px;
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
 }
 
 #github {
-    width: 200px;
+    margin-top: 20px;
+    width: 100px;
     height: 50px;
 }
 
 #linkedin {
+    margin-top: 20px;
     width: 100px;
     height: 50px;
+}
+
+#linkedin img {
+    filter: grayscale(0.5);
 }
 
 #score {

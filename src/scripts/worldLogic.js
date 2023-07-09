@@ -112,12 +112,12 @@ class WorldLogic {
                 let xDistance = (enemy.position.x - player.position.x);
                 let zDistance = (enemy.position.z - player.position.z);
                 let distance = Math.sqrt(xDistance ** 2 + zDistance ** 2);
-                if ((distance > 3 && distance < 50) || enemy.health < enemy.maxHealth) {
+                if ((distance > 5 && distance < 50) || enemy.health < enemy.maxHealth) {
                     mixer.existingAction(runningClip).reset();
                     mixer.existingAction(runningClip).play(); // Run 
                     enemy.moving = true;
                 }
-                else if (distance >= 0 && distance <= 3) {
+                else if (distance <= 5) {
                     mixer.existingAction(attackClip).reset();
                     mixer.existingAction(attackClip).play(); // Attack  
                     enemy.moving = false;
@@ -171,9 +171,10 @@ class WorldLogic {
             if (e.key === '1' && ui.mana >= 1 && skillClock.getDelta() >= cooldown) {
                 document.removeEventListener("keydown", handleShoot)
                 setTimeout(() => document.addEventListener("keydown", handleShoot), 600)
+                ui.removeMovementIndicator();
                 idle = true;
                 firing = true;
-                player.lookAt(new THREE.Vector3(pointingTo.x, 0, pointingTo.z));
+                player.lookAt(new THREE.Vector3(pointingTo.x, 1, pointingTo.z));
                 setTimeout(() => {
                     const loader = new FBXLoader();
                     loader.load("./assets/player/arrow3.fbx", function(fbx) {
@@ -207,7 +208,8 @@ class WorldLogic {
                 setTimeout(() => document.addEventListener("keydown", handleShoot), 600)
                 idle = true;
                 firing = true;
-                player.lookAt(new THREE.Vector3(pointingTo.x, 0, pointingTo.z));
+                ui.removeMovementIndicator();
+                player.lookAt(new THREE.Vector3(pointingTo.x, 1, pointingTo.z));
                 setTimeout(() => {
                     let audio = new Audio("./assets/shock-spell.mp3");
                     if (!muted) audio.play();
@@ -257,13 +259,19 @@ class WorldLogic {
         }
         
         // Once all logic established above, run update() which handles frame by frame rendering
+        let frame = 0;
         function update() {
             requestAnimationFrame(update);
-            
+            frame += 1;
+
             // Call functions requiring updates each frame
             worldObjects.calculateBoundingBox();
             selectedEnemyMesh = ui.displaySelectedEnemy(selectedEnemyMesh, selectedEnemy);
             ui.buildUi();
+            // if (ui.movementIndicator) {
+            //     ui.movementIndicator.scale.x += Math.sin(frame / 10) / 10;
+            //     ui.movementIndicator.scale.z += Math.sin(frame / 10) / 10;
+            // }
 
             // Handle player movement
             if (!idle) {
@@ -273,6 +281,7 @@ class WorldLogic {
                 let speed = 0.3;
                 if (distance < 1) {
                     idle = true;
+                    ui.removeMovementIndicator();
                 }
                 else {
                     player.lookAt(new THREE.Vector3(movingTo.x, 1, movingTo.z));
@@ -280,6 +289,7 @@ class WorldLogic {
                     camera.position.x += speed * xDelta / distance;
                     player.position.z += speed * zDelta / distance;
                     camera.position.z += speed * zDelta / distance;
+                    ui.createMovementIndicator(movingTo.x, movingTo.z);
                 }
             }
 
@@ -340,7 +350,7 @@ class WorldLogic {
                     let zDistance = (enemy.position.z - player.position.z);
                     let distance = Math.sqrt(xDistance ** 2 + zDistance ** 2);
                     let speed = 0.2;
-                    if (enemy.moving && ((distance > 3 && distance < 50) || enemy.health < enemy.maxHealth)) {
+                    if (enemy.moving && ((distance > 5 && distance < 50) || enemy.health < enemy.maxHealth)) {
                         if (zDistance > 0) {
                             enemy.rotation.y = Math.atan(xDistance / zDistance) - 7 * Math.PI / 8
                         } else {
@@ -349,7 +359,7 @@ class WorldLogic {
                         enemy.position.x -= xDistance / distance * speed;
                         enemy.position.z -= zDistance / distance * speed;
                     }
-                    else if (distance >= 0 && distance <= 3) {
+                    else if (distance <= 5) {
                         if (that.worldObjects.objectsBoundingBox[enemy.uuid]?.intersectsBox(that.worldObjects.objectsBoundingBox[player.uuid])) {
                             // if (Math.floor(enemy.clock.getElapsedTime()) > 1) {
                             //     enemy.clock.start();

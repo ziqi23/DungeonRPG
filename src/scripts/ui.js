@@ -13,11 +13,11 @@ class Ui {
 
         // Fetch menu background image & border
         let backgroundImage = document.createElement("img");
-        backgroundImage.setAttribute("src", "./assets/menu.jpg");
+        backgroundImage.setAttribute("src", "./assets/ui/menu.jpg");
         backgroundImage.style.filter = "saturate(150%)";
 
         let imageBorder = document.createElement("img");
-        imageBorder.setAttribute("src", "./assets/menu-border.png");
+        imageBorder.setAttribute("src", "./assets/ui/menu-border.png");
         imageBorder.style.position = "absolute";
         imageBorder.style.left = '0';
         imageBorder.style.top = '-2vh';
@@ -65,14 +65,14 @@ class Ui {
         document.addEventListener("keydown", (e) => {
             if (e.code === "KeyQ") {
                 if (this.potions >= 1) {
-                    let audio = new Audio("./assets/drink-potion.mp3");
+                    let audio = new Audio("./assets/ui/drink-potion.mp3");
                     audio.play();
                     this.potions -= 1;
                     this.health = 100;
                 }
             } else if (e.code === "KeyE") {
                 if (this.manaPotions >= 1) {
-                    let audio = new Audio("./assets/drink-potion.mp3");
+                    let audio = new Audio("./assets/ui/drink-potion.mp3");
                     audio.play();
                     this.manaPotions -= 1;
                     this.mana = 100;
@@ -85,8 +85,6 @@ class Ui {
                     menu.remove();
                     displayOn = false;
                 }
-            } else if (e.code === "Enter") {
-                document.getElementById("endgame-stats").style.visibility = "hidden";
             }
         })
 
@@ -127,6 +125,26 @@ class Ui {
         })
         
     }
+
+    createMovementIndicator(x, z) {
+        if (!this.movementIndicator) {
+            const indicatorGeometry = new THREE.RingGeometry(1, 2, 30);
+            const indicatorMaterial = new THREE.MeshStandardMaterial({color: 0x00FF00, side: THREE.DoubleSide});
+            const mesh = new THREE.Mesh(indicatorGeometry, indicatorMaterial);
+            this.movementIndicator = mesh;
+            mesh.rotation.x = Math.PI / 2;
+            this.scene.add(mesh)
+        }
+        this.movementIndicator.position.set(x, 2, z);
+    }
+
+    removeMovementIndicator() {
+        if (this.movementIndicator) {
+            this.scene.remove(this.movementIndicator);
+            this.movementIndicator = null;
+        }
+    }
+
     displaySelectedEnemy(selectedEnemyMesh, selectedEnemy) {
         if (!selectedEnemy) {
             return;
