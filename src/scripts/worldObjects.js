@@ -9,13 +9,15 @@ class WorldObjects {
         this.camera = world.camera;
         // this.controls = world.controls;
         this.enemies = [];
+        this.npcMixers = [];
         this.playerMixers = [];
         this.enemyMixers = [];
         this.loadCharacter();   
+        this.loadNpc();
         this.loadEnemies();
         this.loadBoss();
         this.validSpawnCoords = [];
-        for (let i = -200; i < 200; i++) {
+        for (let i = -150; i < 150; i++) {
             this.validSpawnCoords.push([i + (Math.random() - 0.5) * 50, 1, -(i + (Math.random() - 0.5) * 50)])
         }
         for (let i = 0; i < 100; i++) {
@@ -61,9 +63,80 @@ class WorldObjects {
             })
             fbx.name = 'player';
             fbx.position.set(-300, 1, -300);
+            // fbx.position.set(-150, 1, 150);
             that.scene.add(fbx);
             that.camera.lookAt(fbx.position);
             this.player = fbx;
+            load();
+        });
+    }
+
+    // Load NPCs
+    async loadNpc() {
+        let that = this;
+        const loader = new FBXLoader();
+        loader.load('./assets/npc/npc1.fbx', (fbx) => {
+            fbx.scale.setScalar(0.05)
+            fbx.rotateY(Math.PI);
+            fbx.traverse(c => {
+                if (c.isMesh) {
+                    c.castShadow = true;
+                    c.receiveShadow = false;
+                }
+            });
+            const animation = new FBXLoader();
+            animation.load("./assets/npc/sitting-talking.fbx", (animation) => {
+                const mixer = new THREE.AnimationMixer(fbx);
+                this.npcMixers.push(mixer);
+                mixer.clipAction(animation.animations[0]).play();
+            })
+            fbx.rotation.y = 5.5 * Math.PI / 8;
+            fbx.position.set(-160, 1, 150);
+            that.scene.add(fbx);
+            load();
+        });
+
+        const loader2 = new FBXLoader();
+        loader2.load('./assets/npc/npc2.fbx', (fbx) => {
+            fbx.scale.setScalar(0.02)
+            fbx.rotateY(Math.PI);
+            fbx.traverse(c => {
+                if (c.isMesh) {
+                    c.castShadow = true;
+                    c.receiveShadow = false;
+                }
+            });
+            const animation = new FBXLoader();
+            animation.load("./assets/npc/sitting.fbx", (animation) => {
+                const mixer = new THREE.AnimationMixer(fbx);
+                this.npcMixers.push(mixer);
+                mixer.clipAction(animation.animations[0]).play();
+            })
+            fbx.rotation.y = - 1.5 * Math.PI / 8;
+            fbx.position.set(-150, 1, 160);
+            that.scene.add(fbx);
+            load();
+        });
+
+        const loader3 = new FBXLoader();
+        loader3.load('./assets/npc/npc3.fbx', (fbx) => {
+            fbx.scale.setScalar(0.04)
+            fbx.rotateY(Math.PI);
+            fbx.traverse(c => {
+                if (c.isMesh) {
+                    c.castShadow = true;
+                    c.receiveShadow = false;
+                }
+            });
+            const animation = new FBXLoader();
+            animation.load("./assets/npc/sitting.fbx", (animation) => {
+                const mixer = new THREE.AnimationMixer(fbx);
+                this.npcMixers.push(mixer);
+                mixer.clipAction(animation.animations[0]).play();
+            })
+            fbx.rotation.y = 1.5 * Math.PI / 8;
+            fbx.position.set(-160, 1, 160);
+            that.scene.add(fbx);
             load();
         });
     }
@@ -160,12 +233,12 @@ class WorldObjects {
             
             this.enemyMixers.push(enemyMixer);
             fbx.scale.setScalar(0.1);
-            fbx.position.set(90, 2, -90);
+            fbx.position.set(-100, 1, 100);
             fbx.rotation.y = Math.random() * Math.PI;
             fbx.name = "enemy";
             fbx.health = 20;
             fbx.maxHealth = 20;
-            fbx.nametag = 'Zombie';
+            fbx.nametag = 'Zombie Leader';
             fbx.clock = new THREE.Clock();
             this.scene.add(fbx);
             this.enemies.push(fbx);

@@ -11,6 +11,7 @@ class WorldLogic {
         this.player = worldObjects.player;
         this.enemies = worldObjects.enemies;
         this.enemyMixers = worldObjects.enemyMixers;
+        this.npcMixers = worldObjects.npcMixers;
         this.mixers = worldObjects.playerMixers;
         this.ui = ui;
         this.muted = muted;
@@ -21,6 +22,7 @@ class WorldLogic {
         let worldObjects = this.worldObjects;
         let mixers = this.mixers;
         let enemyMixers = this.enemyMixers;
+        let npcMixers = this.npcMixers;
         let player = this.player;
         let enemies = this.enemies;
         let scene = this.scene;
@@ -41,6 +43,7 @@ class WorldLogic {
         let playTimeClock = new THREE.Clock();
         let playerHitClock = new THREE.Clock();
         let popUpClock = new THREE.Clock();
+        let npcClock = new THREE.Clock();
 
         // Handle "M" to mute all sound
         document.addEventListener('keydown', handleMute)
@@ -177,6 +180,7 @@ class WorldLogic {
                 ui.removeMovementIndicator();
                 idle = true;
                 firing = true;
+                handler();
                 player.lookAt(new THREE.Vector3(pointingTo.x, 1, pointingTo.z));
                 setTimeout(() => {
                     const loader = new FBXLoader();
@@ -211,6 +215,7 @@ class WorldLogic {
                 setTimeout(() => document.addEventListener("keydown", handleShoot), 600)
                 idle = true;
                 firing = true;
+                handler();
                 ui.removeMovementIndicator();
                 player.lookAt(new THREE.Vector3(pointingTo.x, 1, pointingTo.z));
                 setTimeout(() => {
@@ -281,6 +286,10 @@ class WorldLogic {
             worldObjects.calculateBoundingBox();
             selectedEnemyMesh = ui.displaySelectedEnemy(selectedEnemyMesh, selectedEnemy);
             ui.buildUi();
+            let npcDelta = npcClock.getDelta()
+            npcMixers.forEach(mixer => {
+                mixer.update(npcDelta)
+            })
             // if (ui.movementIndicator) {
             //     ui.movementIndicator.scale.x += Math.sin(frame / 10) / 10;
             //     ui.movementIndicator.scale.z += Math.sin(frame / 10) / 10;
@@ -319,11 +328,9 @@ class WorldLogic {
             }
             const delta = playTimeClock.getDelta();
             mixers.map(mixer => {
-                console.log(firing)
                 if (firing && mixer.name === 'draw-arrow') {
                     currentMove = 'draw-arrow'
                     idle = true;
-                    handler();
                     if (currentMove !== previousMove) {
                         previousMove = currentMove;
                         previousAnimation._actions[0].stop()

@@ -13,7 +13,7 @@ class World {
         scene.background = 0x000000;
         const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 1, 1000);
         camera.position.set(-300, 60, -220);
-
+        // camera.position.set(-200, 50, 200);
         const light = new THREE.DirectionalLight(0x000000, 1);
         light.position.set(100, 100, 100);
         light.castShadow = true;
@@ -156,6 +156,13 @@ class World {
                 load()
             })
         })
+
+        // const fbxLoader = new FBXLoader();
+        // fbxLoader.load('./assets/world/rock1.fbx', fbx => {
+        //     fbx.position.set(-150, 0, 150);
+        //     fbx.scale.setScalar(0.01);
+        //     scene.add(fbx);
+        // })
 
         // Add handler for window resize
         window.addEventListener('resize', handleResize);
