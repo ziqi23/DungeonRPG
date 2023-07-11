@@ -376,6 +376,7 @@ body {
 
 #endgame-stats img {
   position: absolute;
+  filter: grayscale(1);
 }
 
 #stats {

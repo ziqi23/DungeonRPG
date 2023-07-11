@@ -30,8 +30,8 @@ export function load() {
         if (loadingAnimation) loadingPage.removeChild(loadingAnimation);
         const instructions = document.createElement('IMG');
         instructions.src = './assets/ui/instructions.png';
-        instructions.style.width = 'fill';
-        instructions.style.height = 'fill';
+        instructions.style.width = '720px';
+        instructions.style.height = '540px';
         loadingPage.appendChild(instructions);
         loadingPage.addEventListener('click', handleEnterGame);
         function handleEnterGame(e) {

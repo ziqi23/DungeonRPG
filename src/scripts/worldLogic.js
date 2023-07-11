@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader';
 import { FBXLoader } from 'three/examples/jsm/loaders/FBXLoader';
 
 class WorldLogic {
@@ -45,7 +44,7 @@ class WorldLogic {
         let popUpClock = new THREE.Clock();
         let npcClock = new THREE.Clock();
         
-        // renderer.compile(scene, camera);
+        renderer.compile(scene, camera);
 
         // Handle "M" to mute all sound
         document.addEventListener('keydown', handleMute);
