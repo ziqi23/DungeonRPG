@@ -1,6 +1,6 @@
 ## Overview
 
-Last One Standing is a role-playing game set in a post-apocalyptic world. As the main character, you wake up one day to find a deadly virus has swept through your town. You scramble outside but see no signs of life. Hoding on to the last glimmer of hope, you pick up your bow and arrow and set out to find other survivors.
+Last One Standing is a role-playing game set in a post-apocalyptic world. As the main character, you wake up one day to find a deadly virus has swept through your town. You scramble outside but see no signs of life. Holding on to the last glimmer of hope, you pick up your bow and arrow and set out to find other survivors.
 
 Click [here](https://ziqi23.github.io/Last-One-Standing) to play now!
 
