@@ -178,3 +178,6 @@ constructor() {
 <br>
 
 ## Attributions
+- Mixamo - 3D Character Models and Animations
+- CGTrader, TurboSquid - Other 3D Assets
+- Pixabay - Sound Effects
