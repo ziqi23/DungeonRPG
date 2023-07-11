@@ -6,43 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./dist/main.css">
     <script src="./dist/main.js" type="text/javascript" defer></script>
-    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico?">
-    <title>Space Defence</title>
+    <link rel="icon" type="image/x-icon" href="./assets/ui/favicon.ico?">
+    <title>RPG Survival</title>
 </head>
 <body id="body">
-    <audio autoplay id="background-music">
-        <source src="./assets/bg-music.mp3">
+    <audio autoplay loop id="background-music" muted="true">
+        <source src="./assets/audio/background.mp3">
     </audio>
-    <!-- <embed id="background-music" src="/assets/bg-music.mp3" muted="true" loop="true" autostart="true" hidden="true" style="position:absolute"> -->
     <div id="loading-page">
-        <img id="loading-animation" src="./assets/loading.gif" />
+        <img id="loading-animation" src="./assets/ui/loading.gif" />
     </div>
     <div id="header">
         <div class="left">
         </div>
         <div class="right">
-            <div id="github"><a href="https://github.com/ziqi23/JS-Project" target="_blank"><img src="./assets/ui/github.png"></a></div>
-            <div id="linkedin"><a href="https://www.linkedin.com/in/ziqi-zou/" target="_blank"><img src="./assets//ui/linkedin.png"></a></div>
+            <div id="github"><a href="https://github.com/ziqi23/DungeonRPG" target="_blank"><img src="./assets/ui/github.png"></a></div>
+            <div id="linkedin"><a href="https://www.linkedin.com/in/ziqi-zou/" target="_blank"><img src="./assets/ui/linkedin.png"></a></div>
         </div>
     </div>
     <div id="ui">
         <div id="health">
-            <div id="red"><img src="./assets/redPot.png"></div>
-            <div id="blue"><img src="./assets/bluePot.png"></div>
-            <div id="hp-border"><img src="./assets/OrbBorder.png"></div>
-            <div id="hp-orb"><img id="hp-img" src="./assets/Orb.png"></div>
-            <div id="hp-highlight"><img src="./assets/OrbHighlight.png"></div>
-            <div id="hp-shadow"><img src="./assets/OrbShadow.png"></div>
-            <div id="hp-panel"><img src="./assets/HealthPanel.png"></div>
+            <div id="red"><img src="./assets/ui/redPot.png"></div>
+            <div id="blue"><img src="./assets/ui/bluePot.png"></div>
+            <div id="hp-border"><img src="./assets/ui/OrbBorder.png"></div>
+            <div id="hp-orb"><img id="hp-img" src="./assets/ui/Orb.png"></div>
+            <div id="hp-highlight"><img src="./assets/ui/OrbHighlight.png"></div>
+            <div id="hp-shadow"><img src="./assets/ui/OrbShadow.png"></div>
+            <div id="hp-panel"><img src="./assets/ui/HealthPanel.png"></div>
         </div>
         <div id="menu">
-            <img src="./assets/black-background.jpg">
+            <img src="./assets/ui/black-background.jpg">
         </div>
         <div id="enemy-health-empty">
-            <img src="./assets/EnemyHealthEmpty.png">
+            <img src="./assets/ui/hp-bar-empty.png">
         </div>
         <div id="enemy-health-full">
-            <img src="./assets/EnemyHealthFull.png">
+            <img src="./assets/ui/hp-bar-full.png">
         </div>
         <div id="mana">
             <div id="skill-one">
@@ -51,15 +50,15 @@
             <div id="skill-two">
                 <img src="./assets/ui/multi-arrow.png">
             </div>
-            <div id="mp-border"><img src="./assets/OrbBorder.png"></div>
-            <div id="mp-orb"><img id="mp-img" src="./assets/Orb.png"></div>
-            <div id="mp-highlight"><img src="./assets/OrbHighlight.png"></div>
-            <div id="mp-shadow"><img src="./assets/OrbShadow.png"></div>
-            <div id="mp-panel"><img src="./assets/ManaPanel.png"></div>
+            <div id="mp-border"><img src="./assets/ui/OrbBorder.png"></div>
+            <div id="mp-orb"><img id="mp-img" src="./assets/ui/Orb.png"></div>
+            <div id="mp-highlight"><img src="./assets/ui/OrbHighlight.png"></div>
+            <div id="mp-shadow"><img src="./assets/ui/OrbShadow.png"></div>
+            <div id="mp-panel"><img src="./assets/ui/ManaPanel.png"></div>
         </div>
         <div id="exp">
-            <img id="exp-bar" src="./assets/exp.png">
-            <img id="dup-exp-bar" src="./assets/dup-exp.png">
+            <img id="exp-bar" src="./assets/ui/exp.png">
+            <img id="dup-exp-bar" src="./assets/ui/dup-exp.png">
         </div>
     </div>
     <div id="endgame-stats">

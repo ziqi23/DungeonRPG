@@ -4,7 +4,7 @@ import WorldLogic from './scripts/worldLogic.js';
 import Ui from './scripts/ui.js';
 
 let muted = false;
-document.addEventListener('keydown', handleMute)
+document.addEventListener('keydown', handleMute);
 function handleMute(e) {
     if (e.code === "KeyM") {
         muted = !muted;
@@ -16,27 +16,28 @@ function handleMute(e) {
     }
 }
 
+let numLoads = 0;
 let world = new World();
 let objects = new WorldObjects(world);
-let ui = new Ui(world)
-let numLoads = 0;
+let ui = new Ui(world);
 
 export function load() {
     numLoads += 1;
-    if (numLoads === 40) {
-        const loadingPage = document.getElementById('loading-page')
-        const loadingAnimation = document.getElementById('loading-animation')
-        if (loadingAnimation) loadingPage.removeChild(loadingAnimation)
-        const instructions = document.createElement('IMG')
-        instructions.src = './assets/Instructions-v2.png'
-        instructions.style.width = '720px';
-        instructions.style.height = '560px';
-        loadingPage.appendChild(instructions)
-        loadingPage.addEventListener('click', handleEnterGame)
+    if (numLoads === 41) {
+        document.getElementById('background-music').muted = false;
+        const loadingPage = document.getElementById('loading-page');
+        const loadingAnimation = document.getElementById('loading-animation');
+        if (loadingAnimation) loadingPage.removeChild(loadingAnimation);
+        const instructions = document.createElement('IMG');
+        instructions.src = './assets/ui/instructions.png';
+        instructions.style.width = 'fill';
+        instructions.style.height = 'fill';
+        loadingPage.appendChild(instructions);
+        loadingPage.addEventListener('click', handleEnterGame);
         function handleEnterGame(e) {
-            e.preventDefault()
-            document.getElementById('body').removeChild(loadingPage)
-            start()
+            e.preventDefault();
+            document.getElementById('body').removeChild(loadingPage);
+            start();
         }
 
     }

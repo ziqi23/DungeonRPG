@@ -15,6 +15,7 @@ class WorldLogic {
         this.mixers = worldObjects.playerMixers;
         this.ui = ui;
         this.muted = muted;
+        this.renderer = world.renderer;
     }
     
     // Main function to initiate all game logic
@@ -32,7 +33,6 @@ class WorldLogic {
         let muted = this.muted;
         let shotCount = 0;
         let hitCount = 0;
-        let enemyAttacks = [];
         let previousMove = 'idle';
         let currentMove = 'idle';
         let that = this;
@@ -44,9 +44,11 @@ class WorldLogic {
         let playerHitClock = new THREE.Clock();
         let popUpClock = new THREE.Clock();
         let npcClock = new THREE.Clock();
+        
+        // renderer.compile(scene, camera);
 
         // Handle "M" to mute all sound
-        document.addEventListener('keydown', handleMute)
+        document.addEventListener('keydown', handleMute);
         function handleMute(e) {
             if (e.code === "KeyM") {
                 muted = !muted;
@@ -64,10 +66,7 @@ class WorldLogic {
         let selectedEnemyMesh;
         window.addEventListener('keydown', handleTab);
         function handleTab(e) {
-            e.preventDefault()
-            // if (selectedEnemyMesh) {
-            //     document.getElementById('enemy-banner')?.remove();
-            // }
+            e.preventDefault();
             if (e.key === 'Tab') {
                 selectedEnemyIdx += 1;
                 selectedEnemyIdx %= enemies.length;
@@ -78,23 +77,23 @@ class WorldLogic {
             if (selectedEnemy) selectedEnemyMesh = ui.displaySelectedEnemy(selectedEnemyMesh, selectedEnemy);
         }
 
-        // Sort enemies
+        // Sort enemies by position relative to player suc that 'tab' selects nearest enemy
         enemies.sort(sortEnemies);
                 
         function sortEnemies(a, b) {
             const playerLocation = player.position;
             const distanceFromA = Math.sqrt((a.position.x - playerLocation.x) ** 2 + 
             (a.position.y - playerLocation.y) ** 2 + 
-            (a.position.z - playerLocation.z) ** 2)
+            (a.position.z - playerLocation.z) ** 2);
             const distanceFromB = Math.sqrt((b.position.x - playerLocation.x) ** 2 + 
             (b.position.y - playerLocation.y) ** 2 + 
-            (b.position.z - playerLocation.z) ** 2)
-            if (distanceFromA < distanceFromB) return -1
-            if (distanceFromA > distanceFromB) return 1
+            (b.position.z - playerLocation.z) ** 2);
+            if (distanceFromA < distanceFromB) return -1;
+            if (distanceFromA > distanceFromB) return 1;
             return 0;
         }
         
-        // Play enemy animations
+        // Play and switch between enemy animations
         enemyMixers.forEach(mixer => {
             mixer.addEventListener('finished', handleEnemyAnimation);
         })
@@ -105,13 +104,13 @@ class WorldLogic {
             let attackClip;
             this._actions.forEach(action => {
                 if (action._clip.name === 'idle') {
-                    idleClip = action._clip
+                    idleClip = action._clip;
                 }
                 if (action._clip.name === 'running') {
-                    runningClip = action._clip
+                    runningClip = action._clip;
                 }
                 if (action._clip.name === 'attack') {
-                    attackClip = action._clip
+                    attackClip = action._clip;
                 }
             })
             let enemy = this.getRoot();
@@ -120,17 +119,18 @@ class WorldLogic {
             let distance = Math.sqrt(xDistance ** 2 + zDistance ** 2);
             if ((distance > 5 && distance < 50) || (distance > 5 && enemy.health < enemy.maxHealth)) {
                 this.existingAction(runningClip).reset();
-                this.existingAction(runningClip).play(); // Run 
+                this.existingAction(runningClip).play(); // Play running animation 
                 enemy.moving = true;
             }
             else if (distance <= 5) {
                 this.existingAction(attackClip).reset();
-                this.existingAction(attackClip).play(); // Attack  
+                this.existingAction(attackClip).play(); // Play attack animation  
+                setTimeout(() => player.collided = true, 800)
                 enemy.moving = false;
             }
             else {
                 this.existingAction(idleClip).reset();
-                this.existingAction(idleClip).play(); // Idle
+                this.existingAction(idleClip).play(); // Play idle animation
                 enemy.moving = false;
             }
         }
@@ -153,50 +153,57 @@ class WorldLogic {
                 pointingTo.z = intersects[0].point.z;
             }
         }
-        // Handle player movement - left mouse button
-        window.addEventListener("mousedown", handlePlayerMove);
+
+        // Handle player movement via left mouse button
+        setTimeout(() => window.addEventListener("mousedown", handlePlayerMove), 1000);
         function handlePlayerMove(e) {
             if (e.buttons === 1) {
                 idle = false;
-                movingTo = {x: pointingTo.x, z:pointingTo.z}
+                movingTo = {x: pointingTo.x, z:pointingTo.z};
             }
         }
 
-        // Listen for click and use pointingTo to determine the direction to shoot arrow
-        document.addEventListener("keydown", handleShoot)
+        // Listen for keypress and use pointingTo to determine direction to shoot arrow
+        document.addEventListener("keydown", handleShoot);
         let shotObjects = [];
         let skillClock = new THREE.Clock();
         skillClock.getDelta();
         let cooldown = 0.5;
+
         function handleShoot(e) {
-            // Determine skill to cast and execute associated logic
             let distanceX = pointingTo.x - player.position.x;
             let distanceZ = pointingTo.z - player.position.z;    
             let x = pointingTo.x;
-            let z = pointingTo.z;  
+            let z = pointingTo.z; 
             if (e.key === '1' && ui.mana >= 1 && skillClock.getDelta() >= cooldown) {
-                document.removeEventListener("keydown", handleShoot)
-                setTimeout(() => document.addEventListener("keydown", handleShoot), 600)
-                ui.removeMovementIndicator();
+                // Remove event listener for 600ms to simulate time in between arrow shots
+                document.removeEventListener("keydown", handleShoot);
+                setTimeout(() => document.addEventListener("keydown", handleShoot), 600);
+
+                // Stop character movement and remove movement indicator (green circle) when firing
+                player.lookAt(new THREE.Vector3(pointingTo.x, 1, pointingTo.z));
                 idle = true;
                 firing = true;
-                handler();
-                player.lookAt(new THREE.Vector3(pointingTo.x, 1, pointingTo.z));
+                ui.removeMovementIndicator();
+                setFiringToFalseAfterTimeout();
+
+                // After a short delay (simulating drawing a bow), shoot arrow at cursor location
                 setTimeout(() => {
                     const loader = new FBXLoader();
                     loader.load("./assets/player/arrow3.fbx", function(fbx) {
                         fbx.position.x = player.position.x;
-                        fbx.position.y = player.position.y + 5;
+                        fbx.position.y = player.position.y + 2;
                         fbx.position.z = player.position.z;
-                        fbx.rotation.z = Math.PI / 2
+                        fbx.rotation.z = Math.PI / 2;
                         if (distanceZ > 0) {
-                            fbx.rotation.y = Math.atan(distanceX / distanceZ) - Math.PI / 2
-                        } else {
-                            fbx.rotation.y = Math.atan(distanceX / distanceZ) + Math.PI / 2
+                            fbx.rotation.y = Math.atan(distanceX / distanceZ) - Math.PI / 2;
+                        } 
+                        else {
+                            fbx.rotation.y = Math.atan(distanceX / distanceZ) + Math.PI / 2;
                         }              
                         fbx.scale.setScalar(0.5);
                         fbx.name = "arrow";
-                        let audio = new Audio("./assets/laser-gun-shot.wav");
+                        let audio = new Audio("./assets/audio/arrow.mp3");
                         if (!muted) audio.play();
                         shotCount += 1;
                         ui.mana -= 1;
@@ -210,16 +217,22 @@ class WorldLogic {
                         scene.add(fbx);
                     })
                 }, 400)
-            } else if (e.key === '2' && ui.mana >= 3 && skillClock.getDelta() >= cooldown) {
-                document.removeEventListener("keydown", handleShoot)
-                setTimeout(() => document.addEventListener("keydown", handleShoot), 600)
+            } 
+            else if (e.key === '2' && ui.mana >= 3 && skillClock.getDelta() >= cooldown) {
+                // Remove event listener for 600ms to simulate time in between arrow shots
+                document.removeEventListener("keydown", handleShoot);
+                setTimeout(() => document.addEventListener("keydown", handleShoot), 600);
+
+                // Stop character movement and remove movement indicator (green circle) when firing
+                player.lookAt(new THREE.Vector3(pointingTo.x, 1, pointingTo.z));
                 idle = true;
                 firing = true;
-                handler();
                 ui.removeMovementIndicator();
-                player.lookAt(new THREE.Vector3(pointingTo.x, 1, pointingTo.z));
+                setFiringToFalseAfterTimeout();
+
+                // After a short delay (simulating drawing a bow), shoot arrow at cursor location
                 setTimeout(() => {
-                    let audio = new Audio("./assets/shock-spell.mp3");
+                    let audio = new Audio("./assets/audio/arrow.mp3");
                     if (!muted) audio.play();
                     shotCount += 1;
                     ui.mana -= 3;
@@ -229,25 +242,24 @@ class WorldLogic {
                             fbx.position.x = player.position.x;
                             fbx.position.y = player.position.y + 2;
                             fbx.position.z = player.position.z;
-                            fbx.rotation.z = Math.PI / 2
+                            fbx.rotation.z = Math.PI / 2;
                             if (distanceZ > 0) {
-                                fbx.rotation.y = Math.atan(distanceX / distanceZ) - Math.PI / 2
+                                fbx.rotation.y = Math.atan(distanceX / distanceZ) - Math.PI / 2;
                             } else {
-                                fbx.rotation.y = Math.atan(distanceX / distanceZ) + Math.PI / 2
+                                fbx.rotation.y = Math.atan(distanceX / distanceZ) + Math.PI / 2;
                             }   
                             fbx.scale.setScalar(0.5);
                             fbx.name = "multiArrow";
-    
                             let modifier;
                             switch (i) {
                                 case 0:
-                                    modifier = 0.8;
+                                    modifier = -1;
                                     break;
                                 case 1:
-                                    modifier = 1;
+                                    modifier = 0;
                                     break;
                                 case 2:
-                                    modifier = 1.2;
+                                    modifier = 1;
                                     break;
                                 default:
                                     break;
@@ -256,8 +268,8 @@ class WorldLogic {
                                 obj: fbx, 
                                 initialX: player.position.x, 
                                 initialZ: player.position.z, 
-                                destinationX: x * modifier, 
-                                destinationZ: z * modifier
+                                destinationX: x + 5 * modifier * Math.cos(player.rotation.y), 
+                                destinationZ: z + 5 * modifier * Math.sin(player.rotation.y)
                             });
                             scene.add(fbx);
                         })
@@ -274,22 +286,17 @@ class WorldLogic {
             };
         }
         
-        let handler = debounce(() => firing = false, 500);
+        const setFiringToFalseAfterTimeout = debounce(() => firing = false, 500);
 
-        // Once all logic established above, run update() which handles frame by frame rendering
-        let frame = 0;
+        // Run update() which handles frame by frame rendering
         function update() {
             requestAnimationFrame(update);
-            frame += 1;
 
-            // Call functions requiring updates each frame
+            // Call functions requiring calculations each frame
             worldObjects.calculateBoundingBox();
             selectedEnemyMesh = ui.displaySelectedEnemy(selectedEnemyMesh, selectedEnemy);
             ui.buildUi();
-            let npcDelta = npcClock.getDelta()
-            npcMixers.forEach(mixer => {
-                mixer.update(npcDelta)
-            })
+            
             // if (ui.movementIndicator) {
             //     ui.movementIndicator.scale.x += Math.sin(frame / 10) / 10;
             //     ui.movementIndicator.scale.z += Math.sin(frame / 10) / 10;
@@ -320,43 +327,49 @@ class WorldLogic {
             let previousAnimation;
             for (let i in mixers) {
                 if (mixers[i].name === currentMove) {
-                    currentAnimation = mixers[i]
+                    currentAnimation = mixers[i];
                 }
                 if (mixers[i].name === previousMove) {
-                    previousAnimation = mixers[i]
+                    previousAnimation = mixers[i];
                 }
             }
             const delta = playTimeClock.getDelta();
             mixers.map(mixer => {
                 if (firing && mixer.name === 'draw-arrow') {
-                    currentMove = 'draw-arrow'
+                    currentMove = 'draw-arrow';
                     idle = true;
                     if (currentMove !== previousMove) {
                         previousMove = currentMove;
-                        previousAnimation._actions[0].stop()
-                        currentAnimation._actions[0].play()
+                        previousAnimation._actions[0].stop();
+                        currentAnimation._actions[0].play();
                     }
-                    mixer.update(delta * 2)
+                    mixer.update(delta * 2);
                 }
                 else if (!firing && idle && mixer.name === 'idle') {
                     currentMove = 'idle'
                     if (currentMove !== previousMove) {
                         previousMove = currentMove;
-                        previousAnimation._actions[0].stop()
-                        currentAnimation._actions[0].play()
+                        previousAnimation._actions[0].stop();
+                        currentAnimation._actions[0].play();
                     }
-                    mixer.update(delta)
+                    mixer.update(delta);
                 }
                 else if (!firing && !idle && mixer.name === 'run-forward') {
                     currentMove = 'run-forward'
                     if (currentMove !== previousMove) {
                         previousMove = currentMove;
-                        previousAnimation._actions[0].stop()
-                        currentAnimation._actions[0].play()
+                        previousAnimation._actions[0].stop();
+                        currentAnimation._actions[0].play();
                     }
-                    mixer.update(delta)
+                    mixer.update(delta);
                 }
             });
+
+            // Handle NPC animation loop
+            const npcDelta = npcClock.getDelta();
+            npcMixers.forEach(mixer => {
+                mixer.update(npcDelta);
+            })
 
             // Handle enemy animation loop
             enemyMixers.forEach(mixer => {
@@ -367,12 +380,12 @@ class WorldLogic {
                     let distance = Math.sqrt(xDistance ** 2 + zDistance ** 2);
                     let speed = 0.2;
                     if (((distance > 5 && distance < 50) || enemy.health < enemy.maxHealth)) {
-                        enemy.currentMove = 'running'
+                        enemy.currentMove = 'running';
                         if (enemy.moving) {
                             if (zDistance > 0) {
-                                enemy.rotation.y = Math.atan(xDistance / zDistance) - 7 * Math.PI / 8
+                                enemy.rotation.y = Math.atan(xDistance / zDistance) - 7 * Math.PI / 8;
                             } else {
-                                enemy.rotation.y = Math.atan(xDistance / zDistance) + Math.PI / 8
+                                enemy.rotation.y = Math.atan(xDistance / zDistance) + Math.PI / 8;
                             }   
                             enemy.position.x -= xDistance / distance * speed;
                             enemy.position.z -= zDistance / distance * speed;
@@ -380,24 +393,20 @@ class WorldLogic {
                     }
                     else if (distance <= 5) {
                         if (that.worldObjects.objectsBoundingBox[enemy.uuid]?.intersectsBox(that.worldObjects.objectsBoundingBox[player.uuid])) {
-                            enemy.currentMove = 'attack'
-                            // if (Math.floor(enemy.clock.getElapsedTime()) > 1) {
-                            //     enemy.clock.start();
-                            //     player.collided = true;
-                            // }
+                            enemy.currentMove = 'attack';
                         }
                     } else {
-                        enemy.currentMove = 'idle'
+                        enemy.currentMove = 'idle';
                     }
                     if (enemy.currentMove !== enemy.prevMove) {
                         handleEnemyAnimation.bind(mixer)();
                     }
                     enemy.prevMove = enemy.currentMove
-                    mixer.update(enemy.clock.getDelta())
+                    mixer.update(enemy.clock.getDelta());
                 }
             })
 
-            // Move player projectiles in their PointingTo position. Remove projectiles too far out
+            // Move player projectiles in their PointingTo direction and remove projectiles too far out
             shotObjects.forEach((projectile) => {
                 let xDelta = projectile.initialX - projectile.destinationX;
                 let zDelta = projectile.initialZ - projectile.destinationZ;
@@ -415,15 +424,21 @@ class WorldLogic {
                 scene.children.forEach((object2) => {
                     if (object2.name === "enemy") {
                         if (that.worldObjects.objectsBoundingBox[object.obj.uuid]?.intersectsBox(that.worldObjects.objectsBoundingBox[object2.uuid])) { 
-                            let audio = new Audio("./assets/enemy-hit.mp3");
+                            let audios = [
+                                new Audio("./assets/audio/zombie1.mp3"),
+                                new Audio("./assets/audio/zombie2.mp3"),
+                                new Audio("./assets/audio/zombie3.mp3"),
+                                new Audio("./assets/audio/zombie4.mp3")
+                            ]
+                            let audio = audios[Math.floor(Math.random() * audios.length)];
                             if (!muted) audio.play();
-                            scene.remove(object.obj)
+                            scene.remove(object.obj);
                             object2.health -= 1;
                             if (object2.health <= 0) {
                                 object2.collided = true;
                                 if (selectedEnemy === object2) {
                                     selectedEnemy = null;
-                                    scene.remove(selectedEnemyMesh)
+                                    scene.remove(selectedEnemyMesh);
                                 }
                             }
                             else {
@@ -446,7 +461,7 @@ class WorldLogic {
                     if (enemies.indexOf(enemy) === selectedEnemyIdx) {
                         selectedEnemyIdx = -1;
                         selectedEnemy = null;
-                        scene.remove(selectedEnemyMesh)
+                        scene.remove(selectedEnemyMesh);
                         selectedEnemyMesh = null;
                     }
                     if (enemies.indexOf(enemy) < selectedEnemyIdx) {
@@ -459,15 +474,15 @@ class WorldLogic {
             // Handle player hit by enemy projectile, one second timeout between hits registering
             if (player.collided === true && playerHitClock.getElapsedTime() > 1) {
                 if (!popUp) {
-                    let audio = new Audio("./assets/player-hit.wav");
+                    let audio = new Audio("./assets/audio/player-hit.mp3");
                     if (!muted) audio.play();
                     popUp = document.createElement("h1");
-                    popUp.innerHTML = `-10`
+                    popUp.innerHTML = `-10`;
                     popUp.style.position = 'absolute';
                     popUp.style.top = '30vh'
                     popUp.style.right = '50vw';
                     popUp.style.color = 'Red';
-                    popUp.setAttribute("id", "pop-up")
+                    popUp.setAttribute("id", "pop-up");
                     document.getElementById("ui").appendChild(popUp);
                     popUpClock.start();
                     playerHitClock.start();
@@ -479,7 +494,7 @@ class WorldLogic {
                 }
             }
 
-            // Remove pop up damage inflicted after 0.5 seconds
+            // Remove pop up display after 0.5 seconds
             if (popUpClock.getElapsedTime() > 0.5 && popUp) {
                 let el = document.getElementById("pop-up");
                 el.remove();
@@ -494,68 +509,17 @@ class WorldLogic {
             // Render everything above
             renderer.render(scene, camera);
 
-            // Game over logic - reset all objects and display end game graph
+            // Game over logic - reset all objects
+            const stats = document.getElementById("stats");
             if (ui.health <= 0) {
-                if (selectedEnemyMesh) {
-                    selectedEnemy = null;
-                    selectedEnemyIdx = -1;
-                    scene.remove(selectedEnemyMesh);
-                    selectedEnemyMesh = null;
-                }
-                shotObjects.forEach(object => scene.remove(object));
-                enemies.forEach(enemy => scene.remove(enemy));
-                enemies = [];
-                enemyAttacks.forEach(attack => scene.remove(attack));
-                player.position.x = 0;
-                player.position.y = 1.5;
-                player.position.z = 0;
-                ui.health = 100;
-                ui.mana = 100;
-                ui.potions = 3;
-                ui.manaPotions = 3;
-                camera.position.set(0, 10, 50);
-
-                let gameOver = document.getElementById("endgame-stats");
+                stats.innerHTML = `You weren't able to survive. </br> Refresh the webpage to try again.`
+                const gameOver = document.getElementById("endgame-stats");
                 gameOver.style.visibility = "visible";
-                let score = shotCount? Math.floor(hitCount ** 2 / shotCount * playTimeClock.getElapsedTime()) : 0;
-                let rating;
-                switch (true) {
-                    case (score < 99):
-                        rating = "D";
-                        break;
-                    case (score >= 100 && score < 999):
-                        rating = "C";
-                        break;
-                    case (score >= 1000 && score < 9999):
-                        rating = "B";
-                        break;
-                    case (score >= 10000 && score < 99999):
-                        rating = "A";
-                        break;
-                    case (score >= 100000):
-                        rating = "S";
-                        break;
-                }
-                let stats = document.getElementById("stats");
-                if (spaceship.health <= 0) {
-                    stats.innerHTML = `You Won! <br><br>
-                    Total number of shots: ${shotCount}<br>
-                    Total hits: ${hitCount}<br>
-                    Accuracy: ${shotCount ? Math.floor(hitCount / shotCount * 100) : 0}%<br>
-                    Total time survived: ${Math.floor(playTimeClock.getElapsedTime())} seconds<br>
-                    Rating: ${rating}<br><br>
-                    Press 'enter' to play again!`
-                }
-                else {
-                    stats.innerHTML = `You were defeated! <br><br>
-                    Total number of shots: ${shotCount}<br>
-                    Total hits: ${hitCount}<br>
-                    Accuracy: ${shotCount ? Math.floor(hitCount / shotCount * 100) : 0}%<br>
-                    Total time survived: ${Math.floor(playTimeClock.getElapsedTime())} seconds<br>
-                    Rating: ${rating}<br><br>
-                    Press 'enter' to play again!`
-                }
-                playTimeClock.start();
+            }
+            else if (player.position.x < -140 && player.position.z > 140) {
+                stats.innerHTML = `You found other survivors! </br> Perhaps there is still hope left. </br> Refresh the webpage to play again.`
+                const gameOver = document.getElementById("endgame-stats");
+                gameOver.style.visibility = "visible";
             }
         }
         update();

@@ -12,8 +12,7 @@ class World {
         const scene = new THREE.Scene();
         scene.background = 0x000000;
         const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 1, 1000);
-        camera.position.set(-300, 60, -220);
-        // camera.position.set(-200, 50, 200);
+        camera.position.set(-270, 60, -270);
         const light = new THREE.DirectionalLight(0x000000, 1);
         light.position.set(100, 100, 100);
         light.castShadow = true;
@@ -40,9 +39,9 @@ class World {
                     child.receiveShadow = true;
                 }
             })
-            plane.scene.name = "plane"
-            plane.scene.scale.setScalar(2)
-            scene.add(plane.scene)
+            plane.scene.name = "plane";
+            plane.scene.scale.setScalar(2);
+            scene.add(plane.scene);
             load();
         })
 
@@ -58,9 +57,9 @@ class World {
             })
             plane.scene.rotation.y = Math.PI / 2;
             plane.scene.position.set(-120, 0, -300);
-            plane.scene.name = "plane"
-            plane.scene.scale.setScalar(2)
-            scene.add(plane.scene)
+            plane.scene.name = "plane";
+            plane.scene.scale.setScalar(2);
+            scene.add(plane.scene);
             load();
         })
 
@@ -76,9 +75,9 @@ class World {
             })
             plane.scene.rotation.y = - 1.2 * Math.PI / 4;
             plane.scene.position.set(220, -15, -350);
-            plane.scene.name = "plane"
-            plane.scene.scale.setScalar(2)
-            scene.add(plane.scene)
+            plane.scene.name = "plane";
+            plane.scene.scale.setScalar(2);
+            scene.add(plane.scene);
             load();
         })
 
@@ -93,12 +92,10 @@ class World {
         plane.name = "plane";
         scene.add(plane);
         
-        const geometry2 = new THREE.BoxGeometry(100, 500, 0.1);
+        const geometry2 = new THREE.BoxGeometry(115, 500, 0.1);
         const material2 = new THREE.MeshStandardMaterial({color: 0x000000});
         const plane2 = new THREE.Mesh(geometry2, material2);
-        plane2.position.y = 0;
-        plane2.position.z = -300;
-        plane2.position.x = -90;
+        plane2.position.set(-60, 0, -270);
         plane2.rotation.x = Math.PI / 2;
         plane2.rotation.z = 3 * Math.PI / 4;
         plane2.castShadow = true;
@@ -106,29 +103,16 @@ class World {
         plane2.name = "plane";
         scene.add(plane2);
 
-        const geometry3 = new THREE.BoxGeometry(100, 200, 0.1);
+        const geometry3 = new THREE.BoxGeometry(120, 120, 0.1);
         const material3 = new THREE.MeshStandardMaterial({color: 0x000000});
         const plane3 = new THREE.Mesh(geometry3, material3);
-        plane3.position.y = 0;
-        plane3.position.z = -380;
-        plane3.position.x = -270;
+        plane3.position.set(-210, 0, -360);
+
         plane3.rotation.x = Math.PI / 2;
         plane3.castShadow = true;
         plane3.receiveShadow = true;
         plane3.name = "plane";
         scene.add(plane3);
-
-        const geometry4 = new THREE.BoxGeometry(50, 50, 0.1);
-        const material4 = new THREE.MeshStandardMaterial({color: 0x000000});
-        const plane4 = new THREE.Mesh(geometry4, material4);
-        plane4.position.y = 0;
-        plane4.position.z = -335;
-        plane4.position.x = -200;
-        plane4.rotation.x = Math.PI / 2;
-        plane4.castShadow = true;
-        plane4.receiveShadow = true;
-        plane4.name = "plane";
-        scene.add(plane4);
 
         const mtlLoader = new MTLLoader();
         mtlLoader.load('./assets/world/concrete_house.mtl', (materials) => {
@@ -139,7 +123,7 @@ class World {
                 obj.scale.setScalar(1.5);
                 obj.position.set(-250, 1, -450);
                 scene.add(obj);
-                load()
+                load();
             })
         })
 
@@ -153,16 +137,46 @@ class World {
                 obj.scale.setScalar(1.5);
                 obj.position.set(-300, 1, -400);
                 scene.add(obj);
-                load()
+                load();
             })
         })
 
-        // const fbxLoader = new FBXLoader();
-        // fbxLoader.load('./assets/world/rock1.fbx', fbx => {
-        //     fbx.position.set(-150, 0, 150);
-        //     fbx.scale.setScalar(0.01);
-        //     scene.add(fbx);
-        // })
+        mtlLoader2.load('./assets/world/concrete_house.mtl', (materials) => {
+            materials.preload();
+            const objLoader = new OBJLoader();
+            objLoader.setMaterials(materials);
+            objLoader.load('./assets/world/concrete_house.obj', obj => {
+                obj.rotation.y = Math.PI / 2;
+                obj.scale.setScalar(1.5);
+                obj.position.set(-300, 1, -330);
+                scene.add(obj);
+                load();
+            })
+        })
+
+        const fbxLoader = new FBXLoader();
+        fbxLoader.load('./assets/world/RiverRock_FBX.fbx', fbx => {
+            fbx.position.set(-149, 0, 161);
+            fbx.scale.setScalar(0.014);
+            fbx.rotation.y = 5.5 * Math.PI / 8;
+            scene.add(fbx);
+        })
+
+        const fbxLoader2 = new FBXLoader();
+        fbxLoader2.load('./assets/world/RiverRock_FBX.fbx', fbx => {
+            fbx.position.set(-160, 0, 150);
+            fbx.scale.setScalar(0.014);
+            fbx.rotation.y = - 1.5 * Math.PI / 8;
+            scene.add(fbx);
+        })
+
+        const fbxLoader3 = new FBXLoader();
+        fbxLoader3.load('./assets/world/RiverRock_FBX.fbx', fbx => {
+            fbx.position.set(-162, 0, 162);
+            fbx.scale.setScalar(0.014);
+            fbx.rotation.y = 1.5 * Math.PI / 8;
+            scene.add(fbx);
+        })
 
         // Add handler for window resize
         window.addEventListener('resize', handleResize);
@@ -179,23 +193,10 @@ class World {
         renderer.render(scene, camera);
         document.body.appendChild(renderer.domElement);
 
-        // Set camera rotation properties
-        const controls = new OrbitControls( camera, renderer.domElement );
-        controls.rotateSpeed = 3;
-        controls.enablePan = false;
-        controls.enableDamping = true;
-        controls.mouseButtons.RIGHT = THREE.MOUSE.ROTATE;
-        controls.mouseButtons.LEFT = THREE.MOUSE.PAN;
-        // controls.minDistance = 30;
-        // controls.maxDistance = 70;
-        // controls.minPolarAngle = 1 * Math.PI / 3
-        // controls.maxPolarAngle = 0.9 * Math.PI / 2;
-
         // Pass objects to other classes
         this.scene = scene;
         this.camera = camera;
         this.renderer = renderer;
-        // this.controls = controls;
     }
 }
 
