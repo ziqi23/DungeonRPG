@@ -188,7 +188,7 @@ class WorldObjects {
                 fbx.name = "enemy";
                 fbx.health = 3;
                 fbx.maxHealth = 3;
-                fbx.nametag = 'Zombie';
+                fbx.nametag = '';
                 fbx.hitClock = new THREE.Clock();
                 fbx.clock = new THREE.Clock();
                 this.scene.add(fbx);
@@ -243,7 +243,7 @@ class WorldObjects {
             fbx.name = "enemy";
             fbx.health = 20;
             fbx.maxHealth = 20;
-            fbx.nametag = 'Zombie Leader';
+            fbx.nametag = '';
             fbx.hitClock = new THREE.Clock();
             fbx.hitClock.start();
             fbx.clock = new THREE.Clock();
